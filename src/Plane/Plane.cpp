@@ -5,8 +5,8 @@
  *      Author: Administrateur
  */
 
-#include "Location.h"
-#include "Velocity.h"
+#include "Location.cpp"
+#include "Velocity.cpp"
 
 #include <iostream>
 
@@ -51,7 +51,10 @@ public:
 	}
 
 	Location getNextLocation(){
-		return Location(currentLocation.getX() + );
+		int x = currentLocation.getX() + currentVelocity.getVx();
+		int y = currentLocation.getY() + currentVelocity.getVy();
+		int z = currentLocation.getZ() + currentVelocity.getVz();
+		return Location(x,y,z);
 	}
 
 	void print(){

@@ -1,14 +1,15 @@
 /*
- * Location.h
+ * Location.cpp
  *
  *  Created on: Nov. 14, 2018
  *      Author: Administrateur
  */
 
+
 #include <math.h>
 #include <iostream>
 
-#include "Velocity.h";
+#include "Velocity.cpp"
 
 using namespace std;
 
