@@ -19,6 +19,7 @@ class Plane {
 private:
 
 	int id;
+	int releaseTime;
 
 	Location spawnLocation;
 	Location wantedLocation;
@@ -30,9 +31,21 @@ private:
 
 public:
 
-	Plane();
+	Plane(int id, int vx, int vy, int vz, int x, int y, int z, int releaseTime){
+		if(id == -1){
+		this->id = id;
+		}
 
-	virtual ~Plane();
+		this->currentVelocity = Velocity(vx, vy, vz);
+		this->currentLocation = Location(x, y, z);
+		this->spawnLocation = Location(x, y, z);
+		this->wantedLocation = getWantedLocation();
+		this->releaseTime = releaseTime;
+	}
+
+	~Plane(){
+
+	}
 
 	const Location& getCurrentLocation() const{
 		return currentLocation;
@@ -50,11 +63,28 @@ public:
 		return wantedLocation;
 	}
 
-	Location getNextLocation(){
-		int x = currentLocation.getX() + currentVelocity.getVx();
-		int y = currentLocation.getY() + currentVelocity.getVy();
-		int z = currentLocation.getZ() + currentVelocity.getVz();
+	Location getFutureLocation(int time){
+		int x = currentLocation.getX() + time*currentVelocity.getVx();
+		int y = currentLocation.getY() + time*currentVelocity.getVy();
+		int z = currentLocation.getZ() + time*currentVelocity.getVz();
 		return Location(x,y,z);
+	}
+
+	Location getWantedLocation(){
+		Location tempLocation = currentLocation;
+		while(isInsideTheBlock(tempLocation, 100000,100000, 25000, 0, 0, 0)){
+			tempLocation = getNextLocation(tempLocation);
+		}
+
+	}
+
+	bool isInsideTheBlock(Location a, int maxX, int maxY, int maxZ, int minX, int minY, int minZ){
+
+		bool withinX = a.getX() <= maxX && a.getX() >= minX;
+		bool withinY = a.getY() <= maxY && a.getY() >= minY;
+		bool withinZ = a.getZ() <= maxZ && a.getZ() >= minZ;
+
+		return withinX && withinY && withinZ;
 	}
 
 	void print(){
