@@ -27,6 +27,8 @@ private:
 	Location currentLocation;
 	Velocity currentVelocity;
 
+	bool UFO;
+
 
 
 public:
