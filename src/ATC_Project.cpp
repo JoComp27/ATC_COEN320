@@ -12,6 +12,8 @@ using namespace std;
 
 int time = 0;
 
+static int ufoId = 0; //ID used for ufo planes
+
 const int height = 25000;
 const int width = 100000;
 const int depth = 100000;
@@ -55,19 +57,20 @@ int airplane_schedule[160] = {
 };
 
 
-for( int i = 0; i < airplaine_schedule.size(); i++){
-Plane plane = new Plane();
-int ufoID;
-
+for( int i = 0; i < airplane_schedule.size(); i+=8){
+	Plane plane = new Plane();
 	if( airplane_schedule(i)== -1){
 		plane.setUFO(true);
-		plane.set
+		plane.setId(ufoId++);
 	}
-	else
+	else {
 		plane.setUFO(false);
+		plane.setId(airplane_schedule(i);
+	}
+	plane.setCurrentVelocity(airplane_schedule(i+1), airplane_schedule(i+2), airplane_schedule(i+3));
+	plane.setCurrentPosition(airplane_schedule(i+4), airplane_schedule(i+5), airplane_schedule(i+6));
+	plane.setReleaseTime(airplane_schedule(i+7));
 	
-	Plane plane = new Plane(0 
-		
 }
 
 
@@ -80,9 +83,10 @@ int ufoID;
 }
 
 void printStatus(){
+	for( int i; i < active.size(); i++){
+		active(i).printPlane();
 
-
-
+	}
 }
 
 //PARAMETERS OF PROJECT
