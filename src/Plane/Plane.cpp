@@ -38,7 +38,7 @@ public:
 		this->id = id;
 		}
 
-		this->currentVelocity = Velocity(vx, vy, vz);
+		this->currentVelocity = new Velocity(vx, vy, vz);
 		this->currentLocation = Location(x, y, z);
 		this->spawnLocation = Location(x, y, z);
 		this->wantedLocation = getWantedLocation();
@@ -90,9 +90,13 @@ public:
 	}
 
 	void print(){
-		cout << "Plane( " << id << ")" << endl;
+		cout << "Plane ";
+		if(UFO){
+			cout << "UFO";
+		}
+		cout << id << ": ";
 		currentLocation.print();
-		currentVelocity.print();
+		currentVelocity.print() << endl;
 	}
 
 };
