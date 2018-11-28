@@ -127,6 +127,21 @@ system("pause");
 	return 0;
 }
 
+void checkForCollision() {
+	if (active.size() < 2) {
+		return;
+	}
+	else {
+		for (int i = 0; i < active.size() - 1; i++) {
+			for (int j = i; j < active.size(); j++) {
+				while (active[i].collisionCheck(active[j])) {
+					//Print Message saying collision could happen between active[i] and active[j]
+					//Attempt to fix the issue
+				}
+			}
+		}
+	}
+}
 
 
 //PARAMETERS OF PROJECT
