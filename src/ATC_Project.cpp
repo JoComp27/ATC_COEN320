@@ -18,11 +18,6 @@ const int height = 25000;
 const int width = 100000;
 const int depth = 100000;
 
-Plane data[] = {
-		Plane(1,2,3,4,5,6,7,8),
-		Plane(1,2,3,4,5,6,7,8)
-};
-
 vector<Plane> ordered;
 
 vector<Plane> released;
@@ -57,19 +52,17 @@ int airplane_schedule[160] = {
 };
 
 
-for( int i = 0; i < airplane_schedule.size(); i+=8){
+for(int i = 0; i < airplane_schedule.size(); i+=8){
 	Plane plane = new Plane();
-	if( airplane_schedule(i)== -1){
-		plane.setUFO(true);
-		plane.setId(ufoId++);
-	}
-	else {
-		plane.setUFO(false);
-		plane.setId(airplane_schedule(i);
-	}
+	
+	plane.setId(airplane_schedule(i));
 	plane.setCurrentVelocity(airplane_schedule(i+1), airplane_schedule(i+2), airplane_schedule(i+3));
 	plane.setCurrentPosition(airplane_schedule(i+4), airplane_schedule(i+5), airplane_schedule(i+6));
 	plane.setReleaseTime(airplane_schedule(i+7));
+
+	for (int j = 0; j < ordered.size(); j++) {
+		if(plane.getRe)
+	}
 	
 }
 

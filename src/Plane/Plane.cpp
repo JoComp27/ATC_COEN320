@@ -18,6 +18,7 @@ using namespace std;
 class Plane {
 private:
 
+	static ufoId = 0;
 	int id;
 	int releaseTime;
 
@@ -27,26 +28,53 @@ private:
 	Location currentLocation;
 	Velocity currentVelocity;
 
-	bool UFO;
+	bool ufo ;
 
 
 
 public:
 
 	Plane(int id, int vx, int vy, int vz, int x, int y, int z, int releaseTime){
-		if(id == -1){
-		this->id = id;
-		}
-
+		
+		setId(id);
 		this->currentVelocity = new Velocity(vx, vy, vz);
-		this->currentLocation = Location(x, y, z);
-		this->spawnLocation = Location(x, y, z);
+		this->currentLocation = new Location(x, y, z);
+		this->spawnLocation = new Location(x, y, z);
 		this->wantedLocation = getWantedLocation();
 		this->releaseTime = releaseTime;
 	}
 
+	Plane() {
+		
+	}
+	
+
 	~Plane(){
 
+	}
+
+
+	void setId(int id) {
+		if (id == -1) {
+			this->ufo = true;
+			this->id = ufoId++;
+		}
+		else {
+			this->ufo = false;
+			this->id = id;
+		}
+	}
+
+	void setReleaseTime(int releaseTime) {
+		this->releaseTime = releaseTime;
+	}
+
+	void setCurrentLocation(int vx, int vy, int vz) {
+		this->currentLocation = new Location(x, y, z);
+	}
+
+	void setCurrentVelocity(int x, int y, int z) {
+		this->currentVelocity = new Velocity(x, y, z);
 	}
 
 	const Location& getCurrentLocation() const{
@@ -56,6 +84,7 @@ public:
 	const Velocity& getCurrentVelocity() const{
 		return currentVelocity;
 	}
+
 
 	const Location& getSpawnLocation() const{
 		return spawnLocation;
