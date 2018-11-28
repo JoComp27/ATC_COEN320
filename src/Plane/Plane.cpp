@@ -16,6 +16,8 @@ using namespace std;
 #ifndef PLANE_PLANE_H_
 #define PLANE_PLANE_H_
 
+static int ufoId = 0;
+
 class Plane {
 private:
 
@@ -41,7 +43,9 @@ private:
 
 public:
 
-	static int ufoId = 0;
+
+	
+
 
 	Plane(int id, int vx, int vy, int vz, int x, int y, int z, int releaseTime){
 		
@@ -96,6 +100,10 @@ public:
 		return currentVelocity;
 	}
 
+	int getReleaseTime() const {
+		return releaseTime;
+	}
+
 
 	Location getSpawnLocation() const{
 		return spawnLocation;
@@ -112,12 +120,12 @@ public:
 		return Location(x,y,z);
 	}
 
-	Location getWantedLocation(){
+	void setWantedLocation(){
 		Location tempLocation = currentLocation;
 		while(isInsideTheBlock(tempLocation, 100000,100000, 25000, 0, 0, 0)){
 			tempLocation = getFutureLocation(tempLocation, 1);
 		}
-		return tempLocation;
+		this->wantedLocation = tempLocation;
 	}
 
 	bool isInsideTheBlock(Location a, int maxX, int maxY, int maxZ, int minX, int minY, int minZ){
@@ -131,7 +139,7 @@ public:
 
 	bool collisionCheck(Plane a, int time) {
 		Location plane1FL = getFutureLocation(currentLocation, time);
-		Location plane2FL = a.getFutureLocation(a.getCurrentLocation, time);
+		Location plane2FL = a.getFutureLocation(a.getCurrentLocation(), time);
 
 		return isInsideTheBlock(plane2FL, plane1FL.getX() + sideLimit, plane1FL.getY() + sideLimit, plane1FL.getZ() + heightLimit, plane1FL.getX() - sideLimit, plane1FL.getY() - sideLimit, plane1FL.getZ() - heightLimit);
 	}

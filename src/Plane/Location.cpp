@@ -32,7 +32,7 @@ public:
 		this->z = z;
 	}
 
-	virtual ~Location();
+	virtual ~Location() {}
 
 	int distanceBetween(Location a){
 		double result = sqrt(pow(getX()-a.getX(),2)+pow(getY() - a.getY(),2)+pow(getZ() - a.getZ(),2));

@@ -5,15 +5,13 @@
 // Description : Build a Real-Time
 //============================================================================
 
-#include "Plane.cpp"
+
+#include "./Plane/Plane.cpp"
 #include <vector>
 #include <iostream>
 using namespace std;
 
 int time = 0;
-
-// static int ufoId = 0; //ID used for ufo planes
-// This can be found inside of the Plane object
 
 const int height = 25000;
 const int width = 100000;
@@ -26,6 +24,14 @@ vector<Plane> released;
 vector<Plane> active;
 
 vector<Plane> done;
+
+void printStatus() {
+
+	for (int p = 0; p < active.size(); p++) {
+		active[p].print();
+		cout << endl;
+	}
+}
 
 int main() {
 
@@ -53,37 +59,75 @@ int airplane_schedule[160] = {
 };
 
 
+
+//Read the List and put planes in the Ordered Vector
 for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
-	Plane plane = Plane();
+
 	
+	//create planes and set their values
+	Plane plane = Plane();
 	plane.setId(airplane_schedule[i]);
 	plane.setCurrentVelocity(airplane_schedule[i+1], airplane_schedule[i+2], airplane_schedule[i+3]);
 	plane.setCurrentPosition(airplane_schedule[i+4], airplane_schedule[i+5], airplane_schedule[i+6]);
 	plane.setReleaseTime(airplane_schedule[i+7]);
 
-	for (int j = 0; j < ordered.size(); j++) {
-		if(plane.getRe)
-	}
+	//Put plane into ordered vector 
 	
+	if (ordered.size() == 0) {			//if ordered vector is empty put the plane inside
+		ordered.push_back(plane);
+	}
+	else {								//else go through ordered vector and put it at its right position
+		int size = ordered.size();
+		for (int p = 0; p < size; p ++) {
+			if (plane.getReleaseTime() < ordered[p].getReleaseTime()) {
+				ordered.insert(p + ordered.begin(), plane);
+				break;
+			}
+			else if( p == size -1){						//if release time is larger than the last plane release time 
+				ordered.push_back(plane);
+			}
+		}
+	}
 }
 
 
-	while (done.size() < data.size()) {
+while (done.size() < ordered.size()) {	//while time is running and planes are not done
+
+	//Check when released and store into Release array
+	for (int i = 0; i < ordered.size(); i++){
+		if (ordered[i].getReleaseTime() >= time) {
+				released.push_back(ordered[i]);
+		}
+	}
+
+	//Check when active and store into Active array
+	for (int i = 0; i < released.size(); i++) {
+		if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {
+			active.push_back(released[i]);
+		}
+	}
+
+}
+
+
+
+printStatus();
+
+
+	
+
+
+	//while (done.size() < airplane_schedule.size()) {
 
 		//RUN PROGRAM HERE WHILE NOT DONE
 
 
-	}
-
+	//}
+system("pause");
 	return 0;
 }
 
-void printStatus(){
-	for( int i; i < active.size(); i++){
-		active.at(i).print();
 
-	}
-}
 
 //PARAMETERS OF PROJECT
 // (ID, Vx, Vy, Vz, X, Y, Z, Release time)
