@@ -23,15 +23,15 @@ public:
 	Velocity();
 	virtual ~Velocity();
 
-int getVx(){
+int getVx() const{
 	return vx;
 }
 
-int getVy(){
+int getVy() const{
 	return vy;
 }
 
-int getVz(){
+int getVz() const{
 	return vz;
 }
 

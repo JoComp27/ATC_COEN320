@@ -9,6 +9,7 @@
 #include "Velocity.cpp"
 
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -23,6 +24,8 @@ private:
 	int releaseTime;
 
 	bool isHolding = false;
+	double magnetudeOfVelocity;
+	double circleRadius;
 
 	Location spawnLocation;
 	Location wantedLocation;
@@ -81,20 +84,20 @@ public:
 		this->currentVelocity = Velocity(x, y, z);
 	}
 
-	const Location& getCurrentLocation() const{
+	Location getCurrentLocation() const{
 		return currentLocation;
 	}
 
-	const Velocity& getCurrentVelocity() const{
+	Velocity getCurrentVelocity() const{
 		return currentVelocity;
 	}
 
 
-	const Location& getSpawnLocation() const{
+	Location getSpawnLocation() const{
 		return spawnLocation;
 	}
 
-	const Location& getWantedLocation() const{
+	Location getWantedLocation() const{
 		return wantedLocation;
 	}
 
@@ -131,10 +134,13 @@ public:
 
 	void toggleHoldingPattern() {
 		if (!holdingPattern) {
-		isHolding = true;
+			isHolding = true;
+			//Reset the velocity to 
 		}
 		else {
 			isHolding = false;
+			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
+			circleRadius = sqrt(pow(x - 50000, 2) + pow(y - 50000, 2)); // The radius of the circle around the 
 			currentVelocity = Velocity();
 		}
 	}
@@ -144,9 +150,13 @@ public:
 			currentLocation = getFutureLocation(currentLocation, 1);
 		}
 		else {
-			currentVelocity = Velocity(, , 0);
+			currentVelocity = getCircleVelocity;
 			currentLocation = getFutureLocation(currentLocation, 1);
 		}
+	}
+
+	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted 
+
 	}
 
 	void print(){
