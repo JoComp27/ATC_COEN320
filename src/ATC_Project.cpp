@@ -30,10 +30,9 @@ vector<Plane> done;
 
 void printStatus() {
 
-	for (int p = 0; p < ordered.size(); p++) {
-		ordered[p].print();
-
-
+	for (int p = 0; p < active.size(); p++) {
+		active[p].print();
+		cout << endl;
 	}
 }
 
@@ -85,10 +84,11 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 		for (int p = 0; p < size; p ++) {
 			if (plane.getReleaseTime() < ordered[p].getReleaseTime()) {
 				ordered.insert(p + ordered.begin(), plane);
-
+				break;
 			}
-			else {						//if release time is larger than the last plane release time 
+			else if( p == size -1){						//if release time is larger than the last plane release time 
 				ordered.push_back(plane);
+				
 			}
 		}
 	}
