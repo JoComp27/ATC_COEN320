@@ -43,7 +43,9 @@ private:
 
 public:
 
+
 	
+
 
 	Plane(int id, int vx, int vy, int vz, int x, int y, int z, int releaseTime){
 		

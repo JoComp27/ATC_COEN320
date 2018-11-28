@@ -20,7 +20,7 @@ const int height = 25000;
 const int width = 100000;
 const int depth = 100000;
 
-
+vector<Plane> ordered;
 
 vector<Plane> released;
 
@@ -29,7 +29,7 @@ vector<Plane> active;
 vector<Plane> done;
 
 int main() {
-vector<Plane> ordered;
+
 int airplane_schedule[160] = {
 	0, -641, 283, 500, 95000, 101589, 10000, 13, 
 	1, -223, -630, -526, 71000, 100000, 13000, 16, 
@@ -52,6 +52,7 @@ int airplane_schedule[160] = {
 	18, -150, 557, -356, 38000, 100000, 1000, 204, 
 	19, 194, 184, 598, 35000, 0, 2000, 221
 };
+
 
 
 //Read the List and put planes in the Ordered Vector
@@ -100,8 +101,7 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 }
 
 void printStatus(){
-
-	for( int i; i < ordered.size(); i++){
+	for( int i = 0; i < 20; i++){
 		ordered(i).printPlane();
 
 
