@@ -13,9 +13,6 @@ using namespace std;
 
 int time = 0;
 
-// static int ufoId = 0; //ID used for ufo planes
-// This can be found inside of the Plane object
-
 const int height = 25000;
 const int width = 100000;
 const int depth = 100000;
@@ -88,13 +85,31 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 			}
 			else if( p == size -1){						//if release time is larger than the last plane release time 
 				ordered.push_back(plane);
-				
 			}
 		}
 	}
-
-	
 }
+
+
+while (done.size() < ordered.size()) {	//while time is running and planes are not done
+
+	//Check when released and store into Release array
+	for (int i = 0; i < ordered.size(); i++){
+		if (ordered[i].getReleaseTime() >= time) {
+				released.push_back(ordered[i]);
+		}
+	}
+
+	//Check when active and store into Active array
+	for (int i = 0; i < released.size(); i++) {
+		if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {
+			active.push_back(released[i]);
+		}
+	}
+
+}
+
+
 
 printStatus();
 
