@@ -13,5 +13,22 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Plane">
+      <UniqueIdentifier>{44307d24-620c-4dfb-9354-be3baae45118}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\ATC_Project.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Plane\Location.cpp">
+      <Filter>Source Files\Plane</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Plane\Plane.cpp">
+      <Filter>Source Files\Plane</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Plane\Velocity.cpp">
+      <Filter>Source Files\Plane</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

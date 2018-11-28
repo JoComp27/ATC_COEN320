@@ -139,7 +139,7 @@ public:
 
 	bool collisionCheck(Plane a, int time) {
 		Location plane1FL = getFutureLocation(currentLocation, time);
-		Location plane2FL = a.getFutureLocation(a.getCurrentLocation, time);
+		Location plane2FL = a.getFutureLocation(a.getCurrentLocation(), time);
 
 		return isInsideTheBlock(plane2FL, plane1FL.getX() + sideLimit, plane1FL.getY() + sideLimit, plane1FL.getZ() + heightLimit, plane1FL.getX() - sideLimit, plane1FL.getY() - sideLimit, plane1FL.getZ() - heightLimit);
 	}

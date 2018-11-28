@@ -1,0 +1,10 @@
+﻿  ATC_Project.cpp
+c:\users\aidab\documents\github\atc_coen320\src\plane\location.cpp(39): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+c:\users\aidab\documents\github\atc_coen320\src\plane\plane.cpp(176): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+c:\users\aidab\documents\github\atc_coen320\src\plane\plane.cpp(187): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  Plane.cpp
+c:\users\aidab\documents\github\atc_coen320\src\plane\location.cpp(39): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
+c:\users\aidab\documents\github\atc_coen320\src\plane\plane.cpp(176): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+c:\users\aidab\documents\github\atc_coen320\src\plane\plane.cpp(187): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  Generating Code...
+  ATC_COEN320.vcxproj -> C:\Users\aidab\Documents\GitHub\ATC_COEN320\Debug\ATC_COEN320.exe

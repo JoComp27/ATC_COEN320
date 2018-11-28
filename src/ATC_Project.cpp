@@ -67,21 +67,22 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 	plane.setReleaseTime(airplane_schedule[i+7]);
 
 	//Put plane into ordered vector 
-	for (int j = -1; j < ordered.size(); j++) {
-		if (ordered.size() == 0) {			//if ordered vector is empty put the plane inside
-			ordered.push_back(plane);
-		}
-		else {								//else go through ordered vector and put it at its right position
-			for (int p = 0; p < ordered.size(); p++) {
-				if (plane.getReleaseTime() < ordered(p).getReleaseTime()) {
-					ordered.insert(p, plane);
-				}
-				else {						//if release time is larger than the last plane release time 
-					ordered.push_back(plane);
-				}
+	
+	if (ordered.size() == 0) {			//if ordered vector is empty put the plane inside
+		ordered.push_back(plane);
+	}
+	else {								//else go through ordered vector and put it at its right position
+		vector<Plane>::iterator it;
+		for (it = ordered.begin(); it < ordered.end(); it++) {
+			if (plane.getReleaseTime() < it->getReleaseTime()) {
+				ordered.insert(it, plane);
+			}
+			else {						//if release time is larger than the last plane release time 
+				ordered.push_back(plane);
 			}
 		}
 	}
+
 	
 }
 
@@ -101,8 +102,10 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 }
 
 void printStatus(){
-	for( int i = 0; i < 20; i++){
-		ordered(i).printPlane();
+	vector<Plane>::iterator it;
+
+	for(it = ordered.begin(); it < ordered.end(); it++){
+		it->print();
 
 
 	}

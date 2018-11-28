@@ -115,6 +115,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\ATC_Project.cpp" />
+    <ClCompile Include="..\src\Plane\Location.cpp" />
+    <ClCompile Include="..\src\Plane\Plane.cpp" />
+    <ClCompile Include="..\src\Plane\Velocity.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
