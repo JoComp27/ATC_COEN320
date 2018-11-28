@@ -92,6 +92,10 @@ public:
 		return currentVelocity;
 	}
 
+	int getReleaseTime() const {
+		return releaseTime;
+	}
+
 
 	Location getSpawnLocation() const{
 		return spawnLocation;

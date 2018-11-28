@@ -52,35 +52,53 @@ int airplane_schedule[160] = {
 	19, 194, 184, 598, 35000, 0, 2000, 221
 };
 
-
+//Read the List and put planes in the Ordered Vector
 for(int i = 0; i < airplane_schedule.size(); i+=8){
-	Plane plane = Plane();
 	
+	//create planes and set their values
+	Plane plane = Plane();
 	plane.setId(airplane_schedule[i]);
 	plane.setCurrentVelocity(airplane_schedule[i+1], airplane_schedule[i+2], airplane_schedule[i+3]);
 	plane.setCurrentPosition(airplane_schedule[i+4], airplane_schedule[i+5], airplane_schedule[i+6]);
 	plane.setReleaseTime(airplane_schedule[i+7]);
 
-	for (int j = 0; j < ordered.size(); j++) {
-		if(plane.getRe)
+	//Put plane into ordered vector
+	for (int j = -1; j < ordered.size(); j++) {
+		if (ordered.size() == 0) {			//if ordered vector is empty put the plane inside
+			ordered.push_back(plane);
+		}
+		else {								//else go through ordered vector and put it at its right position
+			for (int p = 0; p < ordered.size(); p++) {
+				if (plane.getReleaseTime() = < ordered(p).getReleaseTime()) {
+					ordered.insert(p, plane);
+				}
+				else {						//if release time is larger than the last plane release time 
+					ordered.push_back(plane);
+				}
+			}
+		}
 	}
 	
 }
 
+	
 
-	while (done.size() < data.size()) {
+	
+
+
+	//while (done.size() < airplane_schedule.size()) {
 
 		//RUN PROGRAM HERE WHILE NOT DONE
 
 
-	}
+	//}
 
 	return 0;
 }
 
 void printStatus(){
-	for( int i; i < active.size(); i++){
-		active(i).printPlane();
+	for( int i; i < ordered.size(); i++){
+		ordered(i).printPlane();
 
 	}
 }
