@@ -43,10 +43,6 @@ private:
 
 public:
 
-
-	
-
-
 	Plane(int id, int vx, int vy, int vz, int x, int y, int z, int releaseTime){
 		
 		setId(id);
@@ -152,6 +148,8 @@ public:
 		}
 		else {
 			isHolding = false;
+			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
+			circleRadius = sqrt(pow(50000 - currentLocation.getX(), 2) + pow(50000 - currentLocation.getY(), 2)); // The radius of the circle around the center
 			currentVelocity = getCircleVelocity();
 		}
 	}
@@ -178,8 +176,6 @@ public:
 	}
 
 	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted 
-			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
-			circleRadius = sqrt(pow(50000 - currentLocation.getX(), 2) + pow(50000 - currentLocation.getY(), 2)); // The radius of the circle around the center
 
 			double xVel = magnetudeOfVelocity * ((50000 - currentLocation.getY()) / circleRadius);
 			double yVel = -magnetudeOfVelocity*((50000 - currentLocation.getX())/circleRadius);
