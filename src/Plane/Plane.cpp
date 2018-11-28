@@ -120,12 +120,12 @@ public:
 		return Location(x,y,z);
 	}
 
-	Location getWantedLocation(){
+	void setWantedLocation(){
 		Location tempLocation = currentLocation;
 		while(isInsideTheBlock(tempLocation, 100000,100000, 25000, 0, 0, 0)){
 			tempLocation = getFutureLocation(tempLocation, 1);
 		}
-		return tempLocation;
+		this->wantedLocation = tempLocation;
 	}
 
 	bool isInsideTheBlock(Location a, int maxX, int maxY, int maxZ, int minX, int minY, int minZ){
