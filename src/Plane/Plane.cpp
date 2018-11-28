@@ -24,8 +24,8 @@ private:
 	int id;
 	int releaseTime;
 
-	int heightLimit = 1;
-	int sideLimit = 3;
+	int heightLimit = 1000;
+	int sideLimit = 3000;
 
 	bool isHolding = false;
 	double magnetudeOfVelocity;
@@ -143,14 +143,13 @@ public:
 	void toggleHoldingPattern() {
 		if (!isHolding) {
 			isHolding = true;
-			currentVelocity = goBackToNormal();
-			
-		}
-		else {
-			isHolding = false;
 			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
 			circleRadius = sqrt(pow(50000 - currentLocation.getX(), 2) + pow(50000 - currentLocation.getY(), 2)); // The radius of the circle around the center
 			currentVelocity = getCircleVelocity();
+		}
+		else {
+			isHolding = false;
+			currentVelocity = goBackToNormal();
 		}
 	}
 

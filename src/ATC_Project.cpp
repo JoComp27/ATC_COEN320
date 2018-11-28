@@ -33,6 +33,10 @@ void printStatus() {
 	}
 }
 
+void printHitList() {
+	cout << 
+}
+
 int main() {
 
 int airplane_schedule[160] = {
@@ -108,7 +112,7 @@ while (done.size() < ordered.size()) {	//while time is running and planes are no
 			active.push_back(released[i]);
 			//Send Console Message saying which ATC and which plane was sent
 		}
-		else if (isEscaping(released[i])) {
+		else if (isNeverEntering(released[i])) {
 			done.push_back(released[i]);
 			released.erase(released.begin() + i);
 		}
@@ -125,12 +129,12 @@ system("pause");
 	return 0;
 }
 
-bool isEscaping(Plane a) {
+bool isNeverEntering(Plane a) {
 	bool x = a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0 || a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx < 0;
 	bool y = a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0 || a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy < 0;
 	bool z = a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0 || a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz < 0;
 
-	return x && y && z;
+	return x || y || z;
 }
 
 void checkForCollision() {
@@ -139,7 +143,7 @@ void checkForCollision() {
 	}
 	else {
 		for (int i = 0; i < active.size() - 1; i++) {
-			for (int j = i; j < active.size(); j++) {
+			for (int j = i+1; j < active.size(); j++) {
 				while (active[i].collisionCheck(active[j], 1)) {
 					//TODO: Print Message saying collision could happen between active[i] and active[j]
 					//TODO : Attempt to fix the issue
@@ -148,6 +152,7 @@ void checkForCollision() {
 		}
 	}
 }
+
 
 
 //PARAMETERS OF PROJECT
