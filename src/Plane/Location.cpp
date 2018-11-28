@@ -24,6 +24,8 @@ class Location {
 
 public:
 
+	Location(){}
+
 	Location(int x, int y, int z){
 		this->x = x;
 		this->y = y;
