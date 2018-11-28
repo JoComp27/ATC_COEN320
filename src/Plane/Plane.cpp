@@ -78,13 +78,20 @@ public:
 
 	}
 
-	bool isInsideTheBlock(Location a, int maxX, int maxY, int maxZ, int minX, int minY, int minZ){
+	bool isInsideTheBlock(Location a, int maxX, int maxY, double maxZ, int minX, int minY, double minZ){
 
 		bool withinX = a.getX() <= maxX && a.getX() >= minX;
 		bool withinY = a.getY() <= maxY && a.getY() >= minY;
 		bool withinZ = a.getZ() <= maxZ && a.getZ() >= minZ;
 
 		return withinX && withinY && withinZ;
+	}
+
+	bool collisionCheck(Plane a) {
+		Location plane1FL = getFutureLocation(1);
+		Location plane2FL = a.getFutureLocation(1);
+
+		return isInsideTheBlock(plane2FL, plane1FL.getX() + 3, plane1FL.getY() + 3, plane1FL.getZ() + 0.1894, plane1FL.getX() - 3, plane1FL.getY() - 3, plane1FL.getZ() - 0.1894);
 	}
 
 	void print(){
