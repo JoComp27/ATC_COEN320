@@ -9,7 +9,11 @@
 #include "./Plane/Plane.cpp"
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <string>
 using namespace std;
+
+string fileAddress = "TrackFile.txt";
 
 int time = 0;
 
@@ -33,9 +37,8 @@ void printStatus() {
 	}
 }
 
-void printHitList() {
-	cout << 
-}
+void checkForCollision();
+bool isNeverEntering(Plane a);
 
 int main() {
 
