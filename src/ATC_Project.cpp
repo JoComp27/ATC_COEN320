@@ -28,6 +28,15 @@ vector<Plane> active;
 
 vector<Plane> done;
 
+void printStatus() {
+
+	for (int p = 0; p < ordered.size(); p++) {
+		ordered[p].print();
+
+
+	}
+}
+
 int main() {
 
 int airplane_schedule[160] = {
@@ -72,10 +81,11 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 		ordered.push_back(plane);
 	}
 	else {								//else go through ordered vector and put it at its right position
-		vector<Plane>::iterator it;
-		for (it = ordered.begin(); it < ordered.end(); it++) {
-			if (plane.getReleaseTime() < it->getReleaseTime()) {
-				ordered.insert(it, plane);
+		int size = ordered.size();
+		for (int p = 0; p < size; p ++) {
+			if (plane.getReleaseTime() < ordered[p].getReleaseTime()) {
+				ordered.insert(p + ordered.begin(), plane);
+
 			}
 			else {						//if release time is larger than the last plane release time 
 				ordered.push_back(plane);
@@ -86,7 +96,8 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 	
 }
 
-	
+printStatus();
+
 
 	
 
@@ -97,19 +108,11 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 
 
 	//}
-
+system("pause");
 	return 0;
 }
 
-void printStatus(){
-	vector<Plane>::iterator it;
 
-	for(it = ordered.begin(); it < ordered.end(); it++){
-		it->print();
-
-
-	}
-}
 
 //PARAMETERS OF PROJECT
 // (ID, Vx, Vy, Vz, X, Y, Z, Release time)
