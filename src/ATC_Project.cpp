@@ -134,9 +134,9 @@ void checkForCollision() {
 	else {
 		for (int i = 0; i < active.size() - 1; i++) {
 			for (int j = i; j < active.size(); j++) {
-				while (active[i].collisionCheck(active[j])) {
-					//Print Message saying collision could happen between active[i] and active[j]
-					//Attempt to fix the issue
+				while (active[i].collisionCheck(active[j], 1)) {
+					//TODO: Print Message saying collision could happen between active[i] and active[j]
+					//TODO : Attempt to fix the issue
 				}
 			}
 		}
