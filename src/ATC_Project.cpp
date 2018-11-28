@@ -94,39 +94,60 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 while (done.size() < ordered.size()) {	//while time is running and planes are not done
 
 	//Check when released and store into Release array
-	for (int i = 0; i < ordered.size(); i++){
+	for (int i = 0; i < ordered.size(); i++) {
 		if (ordered[i].getReleaseTime() >= time) {
-				released.push_back(ordered[i]);
+			released.push_back(ordered[i]);
+			ordered.erase(ordered.begin() + i);
 		}
+
 	}
 
 	//Check when active and store into Active array
 	for (int i = 0; i < released.size(); i++) {
 		if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {
 			active.push_back(released[i]);
+			//Send Console Message saying which ATC and which plane was sent
+		}
+		else if (isEscaping(released[i])) {
+			done.push_back(released[i]);
+			released.erase(released.begin() + i);
 		}
 	}
 
+	//Check for active list
+	checkForCollision();
+
 }
-
-
 
 printStatus();
 
-
-	
-
-
-	//while (done.size() < airplane_schedule.size()) {
-
-		//RUN PROGRAM HERE WHILE NOT DONE
-
-
-	//}
 system("pause");
 	return 0;
 }
 
+bool isEscaping(Plane a) {
+	bool x = a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0 || a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx < 0;
+	bool y = a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0 || a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy < 0;
+	bool z = a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0 || a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz < 0;
+
+	return x && y && z;
+}
+
+void checkForCollision() {
+	if (active.size() < 2) {
+		return;
+	}
+	else {
+		for (int i = 0; i < active.size() - 1; i++) {
+			for (int j = i; j < active.size(); j++) {
+				while (active[i].collisionCheck(active[j], 1)) {
+					//TODO: Print Message saying collision could happen between active[i] and active[j]
+					//TODO : Attempt to fix the issue
+				}
+			}
+		}
+	}
+}
 
 
 //PARAMETERS OF PROJECT
