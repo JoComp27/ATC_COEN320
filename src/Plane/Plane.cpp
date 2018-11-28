@@ -177,8 +177,8 @@ public:
 
 	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted 
 
-			double xVel = magnetudeOfVelocity * ((50000 - currentLocation.getY()) / circleRadius);
-			double yVel = -magnetudeOfVelocity*((50000 - currentLocation.getX())/circleRadius);
+			double xVel = magnetudeOfVelocity * ((currentLocation.getY() - 50000) / circleRadius);
+			double yVel = -magnetudeOfVelocity*((currentLocation.getX() - 50000) / circleRadius);
 
 			return Velocity(xVel,yVel,0);
 	}
