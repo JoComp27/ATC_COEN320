@@ -12,7 +12,8 @@ using namespace std;
 
 int time = 0;
 
-static int ufoId = 0; //ID used for ufo planes
+// static int ufoId = 0; //ID used for ufo planes
+// This can be found inside of the Plane object
 
 const int height = 25000;
 const int width = 100000;
@@ -53,12 +54,12 @@ int airplane_schedule[160] = {
 
 
 for(int i = 0; i < airplane_schedule.size(); i+=8){
-	Plane plane = new Plane();
+	Plane plane = Plane();
 	
-	plane.setId(airplane_schedule(i));
-	plane.setCurrentVelocity(airplane_schedule(i+1), airplane_schedule(i+2), airplane_schedule(i+3));
-	plane.setCurrentPosition(airplane_schedule(i+4), airplane_schedule(i+5), airplane_schedule(i+6));
-	plane.setReleaseTime(airplane_schedule(i+7));
+	plane.setId(airplane_schedule[i]);
+	plane.setCurrentVelocity(airplane_schedule[i+1], airplane_schedule[i+2], airplane_schedule[i+3]);
+	plane.setCurrentPosition(airplane_schedule[i+4], airplane_schedule[i+5], airplane_schedule[i+6]);
+	plane.setReleaseTime(airplane_schedule[i+7]);
 
 	for (int j = 0; j < ordered.size(); j++) {
 		if(plane.getRe)
@@ -67,10 +68,12 @@ for(int i = 0; i < airplane_schedule.size(); i+=8){
 }
 
 
+	while (done.size() < data.size()) {
+
+		//RUN PROGRAM HERE WHILE NOT DONE
 
 
-
-	while(done.size() < data.size())
+	}
 
 	return 0;
 }

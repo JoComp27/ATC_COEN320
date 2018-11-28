@@ -22,6 +22,8 @@ private:
 	int id;
 	int releaseTime;
 
+	bool isHolding = false;
+
 	Location spawnLocation;
 	Location wantedLocation;
 
@@ -37,10 +39,9 @@ public:
 	Plane(int id, int vx, int vy, int vz, int x, int y, int z, int releaseTime){
 		
 		setId(id);
-		this->currentVelocity = new Velocity(vx, vy, vz);
-		this->currentLocation = new Location(x, y, z);
-		this->spawnLocation = new Location(x, y, z);
-		this->wantedLocation = getWantedLocation();
+		this->currentVelocity = Velocity(vx, vy, vz);
+		this->currentLocation = Location(x, y, z);
+		this->spawnLocation = Location(x, y, z);
 		this->releaseTime = releaseTime;
 	}
 
@@ -53,6 +54,9 @@ public:
 
 	}
 
+	void hasEnteredBlock() {
+		this->wantedLocation = getWantedLocation();
+	}
 
 	void setId(int id) {
 		if (id == -1) {
@@ -70,11 +74,11 @@ public:
 	}
 
 	void setCurrentLocation(int vx, int vy, int vz) {
-		this->currentLocation = new Location(x, y, z);
+		this->currentLocation = Location(x, y, z);
 	}
 
 	void setCurrentVelocity(int x, int y, int z) {
-		this->currentVelocity = new Velocity(x, y, z);
+		this->currentVelocity = Velocity(x, y, z);
 	}
 
 	const Location& getCurrentLocation() const{
@@ -94,22 +98,22 @@ public:
 		return wantedLocation;
 	}
 
-	Location getFutureLocation(int time){
-		int x = currentLocation.getX() + time*currentVelocity.getVx();
-		int y = currentLocation.getY() + time*currentVelocity.getVy();
-		int z = currentLocation.getZ() + time*currentVelocity.getVz();
+	Location getFutureLocation(Location a, int time){
+		int x = a.getX() + time*currentVelocity.getVx();
+		int y = a.getY() + time*currentVelocity.getVy();
+		int z = a.getZ() + time*currentVelocity.getVz();
 		return Location(x,y,z);
 	}
 
 	Location getWantedLocation(){
 		Location tempLocation = currentLocation;
 		while(isInsideTheBlock(tempLocation, 100000,100000, 25000, 0, 0, 0)){
-			tempLocation = getNextLocation(tempLocation);
+			tempLocation = getFutureLocation(tempLocation, 1);
 		}
-
+		return tempLocation;
 	}
 
-	bool isInsideTheBlock(Location a, int maxX, int maxY, double maxZ, int minX, int minY, double minZ){
+	bool isInsideTheBlock(Location a, int maxX, int maxY, int maxZ, int minX, int minY, int minZ){
 
 		bool withinX = a.getX() <= maxX && a.getX() >= minX;
 		bool withinY = a.getY() <= maxY && a.getY() >= minY;
@@ -118,11 +122,31 @@ public:
 		return withinX && withinY && withinZ;
 	}
 
-	bool collisionCheck(Plane a) {
-		Location plane1FL = getFutureLocation(1);
-		Location plane2FL = a.getFutureLocation(1);
+	bool collisionCheck(Plane a, int time) {
+		Location plane1FL = getFutureLocation(time);
+		Location plane2FL = a.getFutureLocation(time);
 
-		return isInsideTheBlock(plane2FL, plane1FL.getX() + 3, plane1FL.getY() + 3, plane1FL.getZ() + 0.1894, plane1FL.getX() - 3, plane1FL.getY() - 3, plane1FL.getZ() - 0.1894);
+		return isInsideTheBlock(plane2FL, plane1FL.getX() + 3, plane1FL.getY() + 3, plane1FL.getZ() + 1, plane1FL.getX() - 3, plane1FL.getY() - 3, plane1FL.getZ() - 1);
+	}
+
+	void toggleHoldingPattern() {
+		if (!holdingPattern) {
+		isHolding = true;
+		}
+		else {
+			isHolding = false;
+			currentVelocity = Velocity();
+		}
+	}
+
+	updateLocation() {
+		if (!isHolding) {
+			currentLocation = getFutureLocation(currentLocation, 1);
+		}
+		else {
+			currentVelocity = Velocity(, , 0);
+			currentLocation = getFutureLocation(currentLocation, 1);
+		}
 	}
 
 	void print(){
