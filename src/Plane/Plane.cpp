@@ -22,6 +22,9 @@ private:
 	int id;
 	int releaseTime;
 
+	int heightLimit = 1;
+	int sideLimit = 3;
+
 	bool isHolding = false;
 	double magnetudeOfVelocity;
 	double circleRadius;
@@ -130,7 +133,7 @@ public:
 		Location plane1FL = getFutureLocation(currentLocation, time);
 		Location plane2FL = a.getFutureLocation(a.getCurrentLocation, time);
 
-		return isInsideTheBlock(plane2FL, plane1FL.getX() + 3, plane1FL.getY() + 3, plane1FL.getZ() + 1, plane1FL.getX() - 3, plane1FL.getY() - 3, plane1FL.getZ() - 1);
+		return isInsideTheBlock(plane2FL, plane1FL.getX() + sideLimit, plane1FL.getY() + sideLimit, plane1FL.getZ() + heightLimit, plane1FL.getX() - sideLimit, plane1FL.getY() - sideLimit, plane1FL.getZ() - heightLimit);
 	}
 
 	void toggleHoldingPattern() {
