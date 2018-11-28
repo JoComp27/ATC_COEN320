@@ -16,12 +16,16 @@ using namespace std;
 #ifndef PLANE_PLANE_H_
 #define PLANE_PLANE_H_
 
+static int ufoId = 0;
+
 class Plane {
 private:
 
-	static ufoId = 0;
 	int id;
 	int releaseTime;
+
+	int heightLimit = 1;
+	int sideLimit = 3;
 
 	bool isHolding = false;
 	double magnetudeOfVelocity;
@@ -33,11 +37,13 @@ private:
 	Location currentLocation;
 	Velocity currentVelocity;
 
-	bool ufo ;
+	bool ufo = false;
 
 
 
 public:
+
+	
 
 	Plane(int id, int vx, int vy, int vz, int x, int y, int z, int releaseTime){
 		
@@ -76,7 +82,7 @@ public:
 		this->releaseTime = releaseTime;
 	}
 
-	void setCurrentLocation(int vx, int vy, int vz) {
+	void setCurrentPosition(int x, int y, int z) {
 		this->currentLocation = Location(x, y, z);
 	}
 
@@ -130,47 +136,63 @@ public:
 	}
 
 	bool collisionCheck(Plane a, int time) {
-		Location plane1FL = getFutureLocation(time);
-		Location plane2FL = a.getFutureLocation(time);
+		Location plane1FL = getFutureLocation(currentLocation, time);
+		Location plane2FL = a.getFutureLocation(a.getCurrentLocation, time);
 
-		return isInsideTheBlock(plane2FL, plane1FL.getX() + 3, plane1FL.getY() + 3, plane1FL.getZ() + 1, plane1FL.getX() - 3, plane1FL.getY() - 3, plane1FL.getZ() - 1);
+		return isInsideTheBlock(plane2FL, plane1FL.getX() + sideLimit, plane1FL.getY() + sideLimit, plane1FL.getZ() + heightLimit, plane1FL.getX() - sideLimit, plane1FL.getY() - sideLimit, plane1FL.getZ() - heightLimit);
 	}
 
 	void toggleHoldingPattern() {
-		if (!holdingPattern) {
+		if (!isHolding) {
 			isHolding = true;
-			//Reset the velocity to 
+			currentVelocity = goBackToNormal();
+			
 		}
 		else {
 			isHolding = false;
-			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
-			circleRadius = sqrt(pow(x - 50000, 2) + pow(y - 50000, 2)); // The radius of the circle around the 
-			currentVelocity = Velocity();
+			currentVelocity = getCircleVelocity();
 		}
 	}
 
-	updateLocation() {
+	void updateLocation() {
 		if (!isHolding) {
 			currentLocation = getFutureLocation(currentLocation, 1);
 		}
 		else {
-			currentVelocity = getCircleVelocity;
 			currentLocation = getFutureLocation(currentLocation, 1);
+			currentVelocity = getCircleVelocity();
 		}
 	}
 
-	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted 
+	Velocity goBackToNormal() {
 
+		double vectorMagn = sqrt(pow(wantedLocation.getX() - currentLocation.getX(), 2) + pow(wantedLocation.getY() - currentLocation.getY(), 2) + pow(wantedLocation.getZ() - currentLocation.getZ(), 2));
+		double xVel = magnetudeOfVelocity * (wantedLocation.getX() - currentLocation.getX()) / vectorMagn;
+		double yVel = magnetudeOfVelocity * (wantedLocation.getY() - currentLocation.getY()) / vectorMagn;
+		double zVel = magnetudeOfVelocity * (wantedLocation.getZ() - currentLocation.getZ()) / vectorMagn;
+
+		return Velocity(xVel, yVel, zVel); //Reset the velocity to go to destination
+
+	}
+
+	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted 
+			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
+			circleRadius = sqrt(pow(50000 - currentLocation.getX(), 2) + pow(50000 - currentLocation.getY(), 2)); // The radius of the circle around the center
+
+			double xVel = magnetudeOfVelocity * ((50000 - currentLocation.getY()) / circleRadius);
+			double yVel = -magnetudeOfVelocity*((50000 - currentLocation.getX())/circleRadius);
+
+			return Velocity(xVel,yVel,0);
 	}
 
 	void print(){
 		cout << "Plane ";
-		if(UFO){
+		if(ufo){
 			cout << "UFO";
 		}
 		cout << id << ": ";
 		currentLocation.print();
-		currentVelocity.print() << endl;
+		currentVelocity.print();
 	}
 
 };

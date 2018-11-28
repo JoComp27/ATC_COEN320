@@ -20,8 +20,14 @@ public:
 	int vy;
 	int vz;
 
-	Velocity();
-	virtual ~Velocity();
+	Velocity() {}
+
+	Velocity(int vx, int vy, int vz) {
+		this->vx = vx;
+		this->vy = vy;
+		this->vz = vz;
+	}
+	virtual ~Velocity() {}
 
 int getVx() const{
 	return vx;

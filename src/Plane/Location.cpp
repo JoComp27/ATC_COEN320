@@ -24,13 +24,15 @@ class Location {
 
 public:
 
+	Location(){}
+
 	Location(int x, int y, int z){
 		this->x = x;
 		this->y = y;
 		this->z = z;
 	}
 
-	virtual ~Location();
+	virtual ~Location() {}
 
 	int distanceBetween(Location a){
 		double result = sqrt(pow(getX()-a.getX(),2)+pow(getY() - a.getY(),2)+pow(getZ() - a.getZ(),2));

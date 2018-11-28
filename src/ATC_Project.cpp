@@ -20,7 +20,7 @@ const int height = 25000;
 const int width = 100000;
 const int depth = 100000;
 
-vector<Plane> ordered;
+
 
 vector<Plane> released;
 
@@ -29,7 +29,7 @@ vector<Plane> active;
 vector<Plane> done;
 
 int main() {
-
+vector<Plane> ordered;
 int airplane_schedule[160] = {
 	0, -641, 283, 500, 95000, 101589, 10000, 13, 
 	1, -223, -630, -526, 71000, 100000, 13000, 16, 
@@ -53,8 +53,10 @@ int airplane_schedule[160] = {
 	19, 194, 184, 598, 35000, 0, 2000, 221
 };
 
+
 //Read the List and put planes in the Ordered Vector
-for(int i = 0; i < airplane_schedule.size(); i+=8){
+for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
+
 	
 	//create planes and set their values
 	Plane plane = Plane();
@@ -63,14 +65,14 @@ for(int i = 0; i < airplane_schedule.size(); i+=8){
 	plane.setCurrentPosition(airplane_schedule[i+4], airplane_schedule[i+5], airplane_schedule[i+6]);
 	plane.setReleaseTime(airplane_schedule[i+7]);
 
-	//Put plane into ordered vector
+	//Put plane into ordered vector 
 	for (int j = -1; j < ordered.size(); j++) {
 		if (ordered.size() == 0) {			//if ordered vector is empty put the plane inside
 			ordered.push_back(plane);
 		}
 		else {								//else go through ordered vector and put it at its right position
 			for (int p = 0; p < ordered.size(); p++) {
-				if (plane.getReleaseTime() = < ordered(p).getReleaseTime()) {
+				if (plane.getReleaseTime() < ordered(p).getReleaseTime()) {
 					ordered.insert(p, plane);
 				}
 				else {						//if release time is larger than the last plane release time 
@@ -98,8 +100,10 @@ for(int i = 0; i < airplane_schedule.size(); i+=8){
 }
 
 void printStatus(){
+
 	for( int i; i < ordered.size(); i++){
 		ordered(i).printPlane();
+
 
 	}
 }
