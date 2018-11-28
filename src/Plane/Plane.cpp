@@ -136,13 +136,12 @@ public:
 	void toggleHoldingPattern() {
 		if (!isHolding) {
 			isHolding = true;
-			//Reset the velocity to 
+			currentVelocity = goBackToNormal();
+			
 		}
 		else {
 			isHolding = false;
-			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
-			circleRadius = sqrt(pow(currentLocation.getX() - 50000, 2) + pow(currentLocation.getY() - 50000, 2)); // The radius of the circle around the 
-			currentVelocity = Velocity();
+			currentVelocity = getCircleVelocity();
 		}
 	}
 
@@ -151,13 +150,30 @@ public:
 			currentLocation = getFutureLocation(currentLocation, 1);
 		}
 		else {
-			currentVelocity = getCircleVelocity();
 			currentLocation = getFutureLocation(currentLocation, 1);
+			currentVelocity = getCircleVelocity();
 		}
 	}
 
-	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted 
+	Velocity goBackToNormal() {
 
+		double vectorMagn = sqrt(pow(wantedLocation.getX() - currentLocation.getX(), 2) + pow(wantedLocation.getY() - currentLocation.getY(), 2) + pow(wantedLocation.getZ() - currentLocation.getZ(), 2));
+		double xVel = magnetudeOfVelocity * (wantedLocation.getX() - currentLocation.getX()) / vectorMagn;
+		double yVel = magnetudeOfVelocity * (wantedLocation.getY() - currentLocation.getY()) / vectorMagn;
+		double zVel = magnetudeOfVelocity * (wantedLocation.getZ() - currentLocation.getZ()) / vectorMagn;
+
+		return Velocity(xVel, yVel, zVel); //Reset the velocity to go to destination
+
+	}
+
+	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted 
+			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
+			circleRadius = sqrt(pow(50000 - currentLocation.getX(), 2) + pow(50000 - currentLocation.getY(), 2)); // The radius of the circle around the center
+
+			double xVel = magnetudeOfVelocity * ((50000 - currentLocation.getY()) / circleRadius);
+			double yVel = -magnetudeOfVelocity*((50000 - currentLocation.getX())/circleRadius);
+
+			return Velocity(xVel,yVel,0);
 	}
 
 	void print(){

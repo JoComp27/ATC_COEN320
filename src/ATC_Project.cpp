@@ -53,7 +53,7 @@ int airplane_schedule[160] = {
 };
 
 
-for(int i = 0; i < airplane_schedule.size(); i+=8){
+for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 	Plane plane = Plane();
 	
 	plane.setId(airplane_schedule[i]);
@@ -80,7 +80,7 @@ for(int i = 0; i < airplane_schedule.size(); i+=8){
 
 void printStatus(){
 	for( int i; i < active.size(); i++){
-		active(i).printPlane();
+		active.at(i).print();
 
 	}
 }
