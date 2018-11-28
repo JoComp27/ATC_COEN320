@@ -97,20 +97,25 @@ while (done.size() < ordered.size()) {	//while time is running and planes are no
 	for (int i = 0; i < ordered.size(); i++) {
 		if (ordered[i].getReleaseTime() >= time) {
 			released.push_back(ordered[i]);
-		}
-		else if (isEscaping(ordered[1])) {
-			done.push_back(ordered[i]);
+			ordered.erase(ordered.begin() + i);
 		}
 
 	}
-
 
 	//Check when active and store into Active array
 	for (int i = 0; i < released.size(); i++) {
 		if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {
 			active.push_back(released[i]);
+			//Send Console Message saying which ATC and which plane was sent
+		}
+		else if (isEscaping(released[i])) {
+			done.push_back(released[i]);
+			released.erase(released.begin() + i);
 		}
 	}
+
+	//Check for active list
+	checkForCollision();
 
 }
 
