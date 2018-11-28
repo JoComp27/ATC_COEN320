@@ -94,11 +94,16 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 while (done.size() < ordered.size()) {	//while time is running and planes are not done
 
 	//Check when released and store into Release array
-	for (int i = 0; i < ordered.size(); i++){
+	for (int i = 0; i < ordered.size(); i++) {
 		if (ordered[i].getReleaseTime() >= time) {
-				released.push_back(ordered[i]);
+			released.push_back(ordered[i]);
 		}
+		else if (isEscaping(ordered[1])) {
+			done.push_back(ordered[i]);
+		}
+
 	}
+
 
 	//Check when active and store into Active array
 	for (int i = 0; i < released.size(); i++) {
@@ -109,22 +114,18 @@ while (done.size() < ordered.size()) {	//while time is running and planes are no
 
 }
 
-
-
 printStatus();
 
-
-	
-
-
-	//while (done.size() < airplane_schedule.size()) {
-
-		//RUN PROGRAM HERE WHILE NOT DONE
-
-
-	//}
 system("pause");
 	return 0;
+}
+
+bool isEscaping(Plane a) {
+	bool x = a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0 || a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx < 0;
+	bool y = a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0 || a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy < 0;
+	bool z = a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0 || a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz < 0;
+
+	return x && y && z;
 }
 
 void checkForCollision() {
