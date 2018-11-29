@@ -477,10 +477,7 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 
 	//Check when plane is gets out of active zone
 	for (int i = 0; i < active.size(); i++) {
-		if (active[i].isInsideTheBlock(active[i].getCurrentLocation, width, depth, height, 0, 0, 0)) {
-			return;
-		}
-		else {
+		if (!active[i].isInsideTheBlock(active[i].getCurrentLocation, width, depth, height, 0, 0, 0)) {
 			done.push_back(active[i]);			//plane is put into Done array
 			broadcast(active[i]);				//send message to next ATC
 			active.erase(active.begin() + i);	//erase plane from Active zone
