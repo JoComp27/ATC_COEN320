@@ -94,8 +94,16 @@ void receiveBroadcast(Plane a) {
 
 	string outDirection = getExitDirection(a);
 
-	out << "has exited our airspace towards your airspace at the position x: " << a.getCurrentLocation().getX() << " y: " << a.getCurrentLocation().getY() << " z: " << a.getCurrentLocation().getZ() << ", over." << endl << endl;
-	cout << "has exited the airspace towards your airspace at the position x: " << a.getCurrentLocation().getX() << " y: " << a.getCurrentLocation().getY() << " z: " << a.getCurrentLocation().getZ() << ", over." << endl << endl;
+	out << "has exited our airspace towards your airspace at the position" 
+		<< " x: " << a.getCurrentLocation().getX() 
+		<< " y: " << a.getCurrentLocation().getY() 
+		<< " z: " << a.getCurrentLocation().getZ() 
+		<< ", over." << endl << endl;
+	cout << "has exited the airspace towards your airspace at the position" 
+		<< " x: " << a.getCurrentLocation().getX()
+		<< " y: " << a.getCurrentLocation().getY() 
+		<< " z: " << a.getCurrentLocation().getZ() 
+		<< ", over." << endl << endl;
 
 	out.close();
 
@@ -109,36 +117,34 @@ void request(Plane a, int messageType, int n = 1) {
 	out << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << " ---------" << endl;
 	cout << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << " ---------" << endl;
 
+	if (a.getUfo()) {
+		out << "UFO " << a.getId;
+		cout << "UFO " << a.getId;
+	}
+	else {
+		out << "Plane " << a.getId;
+		cout << "Plane " << a.getId;
+	}
+
 	switch (messageType) {
 	case 1: //Location Request
-		if (a.getUfo()) {
-			out << "UFO " << a.getId << ",ATC requests your current position, over." << endl << endl;
-			cout << "UFO " << a.getId << ",ATC requests your current position, over." << endl << endl;
-		}
-		else {
-		out << "Plane " << a.getId << ",ATC requests your current position, over." << endl << endl;
-		cout << "Plane " << a.getId << ",ATC requests your current position, over." << endl << endl;
-		}
+
+		out << ",ATC requests your current position, over." << endl << endl;
+		cout << ",ATC requests your current position, over." << endl << endl;
+
 		break;
 	case 2: //Velocity Request
-		if (a.getUfo()) {
-			out << "UFO " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
-			cout << "UFO " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
-		}
-		else {
-			out << "Plane " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
-			cout << "Plane " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
-		}
+
+		out << ",ATC requests your current velocity, over." << endl << endl;
+		cout << ",ATC requests your current velocity, over." << endl << endl;
+
 		break;
+
 	case 3: //Future Position Request
-		if (a.getUfo()) {
-			out << "UFO " << a.getId << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-			cout << "UFO " << a.getId << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-		}
-		else {
-			out << "Plane " << a.getId << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-			cout << "Plane " << a.getId << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-		}
+
+		out << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
+		cout << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
+
 		break;
 	default:
 		
@@ -156,92 +162,59 @@ void response(Plane a, int messageType, int n = 1) {
 
 	Location futureLoc = a.getFutureLocation(n);
 
+		if (a.getUfo()) {
+			out << "This is UFO " << a.getId;
+			cout << "This is UFO " << a.getId;
+		}
+		else {
+			out << "This is Plane " << a.getId;
+			cout << "This is Plane " << a.getId;
+		}
+
 	switch (messageType) {
 	case 1: //Location Request
-		if (a.getUfo()) {
-			out << "This is UFO " << a.getId << ", our current position is" 
-				<< " x: " << a.getCurrentLocation().getX() 
-				<< " y: " << a.getCurrentLocation().getY() 
-				<< " z: " << a.getCurrentLocation().getZ() 
-				<< ", over." << endl << endl;
 
-			cout << "This is UFO " << a.getId << ", our current position is" 
-				<< " x: " << a.getCurrentLocation().getX() 
-				<< " y: " << a.getCurrentLocation().getY() 
-				<< " z: " << a.getCurrentLocation().getZ() 
-				<< ", over." << endl << endl;
-		}
-		else {
-			out << "This is Plane " << a.getId << ", our current position is" 
-				<< " x: " << a.getCurrentLocation().getX() 
-				<< " y: " << a.getCurrentLocation().getY() 
-				<< " z: " << a.getCurrentLocation().getZ() 
-				<< ", over." << endl << endl;
+		out << ", our current position is"
+			<< " x: " << a.getCurrentLocation().getX()
+			<< " y: " << a.getCurrentLocation().getY()
+			<< " z: " << a.getCurrentLocation().getZ()
+			<< ", over." << endl << endl;
 
-			cout << "This is Plane " << a.getId << ", our current position is" 
-				<< " x: " << a.getCurrentLocation().getX() 
-				<< " y: " << a.getCurrentLocation().getY() 
-				<< " z: " << a.getCurrentLocation().getZ() 
-				<< ", over." << endl << endl;
-		}
+		cout << ", our current position is"
+			<< " x: " << a.getCurrentLocation().getX()
+			<< " y: " << a.getCurrentLocation().getY()
+			<< " z: " << a.getCurrentLocation().getZ()
+			<< ", over." << endl << endl;
+
 		break;
 	case 2: //Velocity Request
-		if (a.getUfo()) {
-			out << "This is UFO " << a.getId << ", our current velocity is" 
-				<< " vx: " << a.getCircleVelocity().getVx() 
-				<< " vy: " << a.getCurrentVelocity().getVy() 
-				<< " vz: " << a.getCurrentVelocity().getVz() 
-				<< ", over." << endl << endl;
 
-			cout << "This is UFO " << a.getId << ", our current velocity is" 
-				<< " vx: " << a.getCircleVelocity().getVx() 
-				<< " vy: " << a.getCurrentVelocity().getVy() 
-				<< " vz: " << a.getCurrentVelocity().getVz() 
-				<< ", over." << endl << endl;
-		}
-		else {
-			out << "This is Plane " << a.getId << ", our current velocity is" 
-				<< " vx: " << a.getCircleVelocity().getVx() << " vy: " 
-				<< a.getCurrentVelocity().getVy() << " vz: " 
-				<< a.getCurrentVelocity().getVz() 
-				<< ", over." << endl << endl;
+		out << ", our current velocity is"
+			<< " vx: " << a.getCircleVelocity().getVx()
+			<< " vy: " << a.getCurrentVelocity().getVy()
+			<< " vz: " << a.getCurrentVelocity().getVz()
+			<< ", over." << endl << endl;
 
-			cout << "This is Plane " << a.getId << ", our current velocity is" 
-				<< " vx: " << a.getCircleVelocity().getVx() 
-				<< " vy: " << a.getCurrentVelocity().getVy() 
-				<< " vz: " << a.getCurrentVelocity().getVz() 
-				<< ", over." << endl << endl;
+		cout << ", our current velocity is"
+			<< " vx: " << a.getCircleVelocity().getVx()
+			<< " vy: " << a.getCurrentVelocity().getVy()
+			<< " vz: " << a.getCurrentVelocity().getVz()
+			<< ", over." << endl << endl;
 
-		}
 		break;
 	case 3: //Future Position Request
-		
-		if (a.getUfo()) {
-			out << "This is UFO " << a.getId << ", our future position at time " << (time+n) 
-				<< " is x: " << futureLoc.getX() 
-				<< " y: " << futureLoc.getY() 
-				<< " z: " << futureLoc.getZ() 
-				<< ", over." << endl << endl;
 
-			cout << "This is UFO " << a.getId << ", our future position at time " << (time + n) 
-				<< " is x: " << futureLoc.getX() 
-				<< " y: " << futureLoc.getY() 
-				<< " z: " << futureLoc.getZ() 
-				<< ", over." << endl << endl;
-		}
-		else {
-			out << "This is Plane " << a.getId << ", our future position at time " << (time + n) 
-				<< " is x: " << futureLoc.getX() 
-				<< " y: " << futureLoc.getY() 
-				<< " z: " << futureLoc.getZ() 
-				<< ", over." << endl << endl;
+		out << ", our future position at time " << (time + n)
+			<< " is x: " << futureLoc.getX()
+			<< " y: " << futureLoc.getY()
+			<< " z: " << futureLoc.getZ()
+			<< ", over." << endl << endl;
 
-			cout << "This is Plane " << a.getId << ", our future position at time " << (time + n) 
-				<< " is x: " << futureLoc.getX() 
-				<< " y: " << futureLoc.getY() 
-				<< " z: " << futureLoc.getZ() 
-				<< ", over." << endl << endl;
-		}
+		cout << ", our future position at time " << (time + n)
+			<< " is x: " << futureLoc.getX()
+			<< " y: " << futureLoc.getY()
+			<< " z: " << futureLoc.getZ()
+			<< ", over." << endl << endl;
 		break;
 	default:
 
@@ -259,33 +232,26 @@ void collisionWarning(Plane a, Plane b) {
 	cout << " ********** SPORADIC COLLISION WARNING AT TIME " << time << " ********** " << endl;
 
 	if (a.getUfo() && b.getUfo()) {
-		out << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl 
-			<< "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
-
-		cout << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl 
-			<< "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		out << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl;
+		cout << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl;
 	}
 	else if (a.getUfo) {
-		out << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl 
-			<< "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
-
-		cout << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl 
-			<< "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		out << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl;
+		cout << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl;
 	}
 	else if (b.getUfo) {
-		out << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl 
-			<< "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
-
-		cout << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl 
-			<< "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		out << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl;
+		cout << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl;
 	}
 	else {
-		out << "A possible collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl 
-			<< "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
-
-		cout << "A possible collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl 
-			<< "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		out << "A possible collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl;
+		cout << "A possible collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl;
+			
 	}
+
+	out << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+	cout << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+
 
 	out.close();
 
@@ -333,7 +299,12 @@ void printHitList() {
 
 void printResponseTimes() {
 	
-	//TODO : Sort all times vector gathered
+	sort(orderedToReleased.begin(), orderedToReleased.end());
+	sort(releasedToActive.begin(), releasedToActive.end());
+	sort(activeToDone.begin(), activeToDone.end());
+	sort(checkCollisions.begin(), checkCollisions.end());
+	sort(updateLocations.begin(), updateLocations.end());
+	sort(userConsole.begin(), userConsole.begin());
 
 	clock_t max1 = orderedToReleased[orderedToReleased.back()];
 	clock_t min1 = orderedToReleased[0];
