@@ -10,6 +10,7 @@
 #include <vector>
 #include <iostream>
 #include <pthread.h>
+#include <time.h>
 #include <thread>
 #include <fstream>
 #include <string>
@@ -17,8 +18,8 @@
 using namespace std;
 
 string fileAddress = "TrackFile.txt";
-int time = 0;
 
+int time = 0;
 
 const int height = 25000;
 const int width = 100000;
@@ -29,7 +30,16 @@ vector<Plane> released;	//contains planes that are released but not yet in activ
 vector<Plane> active;	//contains planes that are in active zone
 vector<Plane> done;		//contains planes that left the active zone or planes that will never get into the active zone
 
+clock_t tStart;
+clock_t tEnd;
 
+clock_t emptyBlock;
+vector<clock_t> orderedToReleased;
+vector<clock_t> releasedToActive;
+vector<clock_t> activeToDone;
+vector<clock_t> checkCollisions;
+vector<clock_t> updateLocations;
+vector<clock_t> userConsole;
 
 void updateLocation();
 bool isNeverEntering(Plane a);
@@ -321,6 +331,85 @@ void printHitList() {
 	out.close();
 }
 
+void printResponseTimes() {
+	
+	//TODO : Sort all times vector gathered
+
+	clock_t max1 = orderedToReleased[orderedToReleased.back()];
+	clock_t min1 = orderedToReleased[0];
+
+	clock_t max2 = releasedToActive[releasedToActive.back()];;
+	clock_t min2 = releasedToActive[0];
+
+	clock_t max3 = activeToDone[activeToDone.back()];;
+	clock_t min3 = activeToDone[0];
+
+	clock_t max4 = checkCollisions[checkCollisions.back()];;
+	clock_t min4 = checkCollisions[0];
+
+	clock_t max5 = updateLocations[updateLocations.back()];;
+	clock_t min5 = updateLocations[0];
+
+	clock_t max6 = userConsole[userConsole.back()];
+	clock_t min6 = userConsole[0];
+
+	ofstream out;
+	out.open(fileAddress);
+
+	out << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
+		<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
+		<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
+		<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
+		<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
+		<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl
+		<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+
+	cout << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
+		<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
+		<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
+		<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
+		<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
+		<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl
+		<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+
+	out.close();
+
+}
+
+void emptyBlockTest() {
+	tStart = clock();
+	//Null Program
+	endClock(0);
+}
+
+void endClock(int processID) {
+	tEnd = clock();
+	switch (processID) {
+	case 0:
+		emptyBlock = tEnd - tStart;
+		break;
+	case 1:
+		orderedToReleased.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 2:
+		releasedToActive.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 3:
+		activeToDone.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 4:
+		checkCollisions.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 5:
+		updateLocations.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 6:
+		userConsole.push_back(tEnd - tStart - emptyBlock);
+		break;
+	default:
+	}
+}
+
 int main() {
 
 int airplane_schedule[160] = {
@@ -346,6 +435,7 @@ int airplane_schedule[160] = {
 	19, 194, 184, 598, 35000, 0, 2000, 221
 };
 
+emptyBlockTest();
 
 
 //Read the List and put planes in the Ordered Vector
@@ -381,6 +471,8 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 
 //while (done.size() < sizeof(airplane_schedule) / sizeof(*airplane_schedule) / 8) {	//while time is running and planes are not done
 
+	tStart = clock();
+
 	//Check when first plane is released and store into Release array
 	if (ordered.size() != 0) {
 		if (ordered[0].getReleaseTime() >= time) {
@@ -388,6 +480,10 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 			ordered.erase(ordered.begin());	//erase the plane from the ordered array
 		}
 	}
+
+	endClock(1);
+
+	tStart = clock();
 
 	//Check when plane is active and store into Active zone
 	for (int i = 0; i < released.size(); i++) {
@@ -398,10 +494,15 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 		}
 		else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {	
 			active.push_back(released[i]);			//put plane into Active array
+			receiveBroadcast(released[i]);			//Receive Message from other ATC about new plane
 			released.erase(ordered.begin() + i);	//erase plane from Released array
-			//TODO Send Console Message saying which ATC and which plane was sent with time
+			
 		}
 	}
+
+	endClock(2);
+
+	tStart = clock();
 
 	//Check when plane is gets out of active zone
 	for (int i = 0; i < active.size(); i++) {
@@ -409,20 +510,33 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 			return;
 		}
 		else {
-			//TODO send message to user 
 			done.push_back(active[i]);			//plane is put into Done array
+			broadcast(active[i]);				//send message to next ATC
 			active.erase(active.begin() + i);	//erase plane from Active zone
 		}
 	}
 
+	endClock(3);
+
+	tStart = clock();
+
 	//Check for collisions in active list
 	checkForCollision();
+
+	endClock(4);
+
+	tStart = clock();
+
 	//update the location of all planes
 	updateLocation();
+
+	endClock(5);
 	
 //}
 
-printStatus();
+printHitList();
+
+printResponseTimes(); // Returns the max and min response time of main processes 
 
 system("pause");
 	return 0;
@@ -430,13 +544,13 @@ system("pause");
 
 
 //prints the status of the planes that are Active
-void printStatus() {
-
-	for (int p = 0; p < active.size(); p++) {
-		active[p].print();
-		cout << endl;
-	}
-}
+//void printStatus() {
+//
+//	for (int p = 0; p < active.size(); p++) {
+//		active[p].print();
+//		cout << endl;
+//	}
+//}
 
 //checks if plane never enters the active zone
 bool isNeverEntering(Plane a) {
