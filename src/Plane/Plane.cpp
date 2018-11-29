@@ -24,21 +24,21 @@ private:
 	int id;
 	int releaseTime;
 
+	//limit set to check for collisions
 	int heightLimit = 1000;
 	int sideLimit = 3000;
 
-	bool isHolding = false;
 	double magnetudeOfVelocity;
 	double circleRadius;
 
 	Location spawnLocation;
 	Location wantedLocation;
-
 	Location currentLocation;
+
 	Velocity currentVelocity;
 
 	bool ufo = false;
-
+	bool isHolding = false;
 
 
 public:
@@ -59,10 +59,6 @@ public:
 
 	~Plane(){
 
-	}
-
-	void hasEnteredBlock() {
-		this->wantedLocation = getWantedLocation();
 	}
 
 	void setId(int id) {
@@ -109,35 +105,45 @@ public:
 		return wantedLocation;
 	}
 
-	Location getFutureLocation(Location a, int time){
-		int x = a.getX() + time*currentVelocity.getVx();
-		int y = a.getY() + time*currentVelocity.getVy();
-		int z = a.getZ() + time*currentVelocity.getVz();
+	Location getFutureLocation(int time){
+		int x = currentLocation.getX() + time*currentVelocity.getVx();
+		int y = currentLocation.getY() + time*currentVelocity.getVy();
+		int z = currentLocation.getZ() + time*currentVelocity.getVz();
 		return Location(x,y,z);
 	}
 
-	void setWantedLocation(){
-		Location tempLocation = currentLocation;
-		while(isInsideTheBlock(tempLocation, 100000,100000, 25000, 0, 0, 0)){
-			tempLocation = getFutureLocation(tempLocation, 1);
+	void setWantedLocation() {
+		int i = 1;
+		while (isInsideTheBlock(getFutureLocation(i), 100000, 100000, 25000, 0, 0, 0)) {
+			i++;
 		}
-		this->wantedLocation = tempLocation;
+		this->wantedLocation = getFutureLocation(i);
 	}
 
-	bool isInsideTheBlock(Location a, int maxX, int maxY, int maxZ, int minX, int minY, int minZ){
+	bool isInsideTheBlock(Location location, int maxX, int maxY, int maxZ, int minX, int minY, int minZ){
 
-		bool withinX = a.getX() <= maxX && a.getX() >= minX;
-		bool withinY = a.getY() <= maxY && a.getY() >= minY;
-		bool withinZ = a.getZ() <= maxZ && a.getZ() >= minZ;
+		bool withinX = location.getX() <= maxX && location.getX() >= minX;
+		bool withinY = location.getY() <= maxY && location.getY() >= minY;
+		bool withinZ = location.getZ() <= maxZ && location.getZ() >= minZ;
 
 		return withinX && withinY && withinZ;
 	}
 
+	
+	//checks for future collisions 
 	bool collisionCheck(Plane a, int time) {
-		Location plane1FL = getFutureLocation(currentLocation, time);
-		Location plane2FL = a.getFutureLocation(a.getCurrentLocation(), time);
-
+		Location plane1FL = getFutureLocation(time);
+		Location plane2FL = a.getFutureLocation(time);
+		 
 		return isInsideTheBlock(plane2FL, plane1FL.getX() + sideLimit, plane1FL.getY() + sideLimit, plane1FL.getZ() + heightLimit, plane1FL.getX() - sideLimit, plane1FL.getY() - sideLimit, plane1FL.getZ() - heightLimit);
+	}
+
+	//redirect a plane in case of future collision
+	void redirect(Plane planeGoDown) {
+		setCurrentVelocity(currentVelocity.getVx(), currentVelocity.getVy(), currentVelocity.getVz() + 10);
+		planeGoDown.setCurrentVelocity(planeGoDown.getCurrentVelocity().getVx(), planeGoDown.getCurrentVelocity().getVy(), planeGoDown.getCurrentVelocity().getVz() - 10);
+		setWantedLocation();				//set the exit location	
+		planeGoDown.setWantedLocation();	//set the exit location
 	}
 
 	void toggleHoldingPattern() {
@@ -153,12 +159,13 @@ public:
 		}
 	}
 
+	//updates the current location of the plane
 	void updateLocation() {
 		if (!isHolding) {
-			currentLocation = getFutureLocation(currentLocation, 1);
+			currentLocation = getFutureLocation(1);
 		}
 		else {
-			currentLocation = getFutureLocation(currentLocation, 1);
+			currentLocation = getFutureLocation(1);
 			currentVelocity = getCircleVelocity();
 		}
 	}
@@ -177,7 +184,7 @@ public:
 	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted 
 
 			double xVel = magnetudeOfVelocity * ((currentLocation.getY() - 50000) / circleRadius);
-			double yVel = -magnetudeOfVelocity*((currentLocation.getX() - 50000) / circleRadius);
+			double yVel = -magnetudeOfVelocity * ((currentLocation.getX() - 50000) / circleRadius);
 
 			return Velocity(xVel,yVel,0);
 	}
