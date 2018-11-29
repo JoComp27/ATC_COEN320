@@ -306,23 +306,23 @@ void printResponseTimes() {
 	sort(updateLocations.begin(), updateLocations.end());
 	sort(userConsole.begin(), userConsole.begin());
 
-	clock_t max1 = orderedToReleased[orderedToReleased.back()];
-	clock_t min1 = orderedToReleased[0];
+	clock_t max1 = orderedToReleased.back();
+	clock_t min1 = orderedToReleased.front();
 
-	clock_t max2 = releasedToActive[releasedToActive.back()];;
-	clock_t min2 = releasedToActive[0];
+	clock_t max2 = releasedToActive.back();
+	clock_t min2 = releasedToActive.front();
 
-	clock_t max3 = activeToDone[activeToDone.back()];;
-	clock_t min3 = activeToDone[0];
+	clock_t max3 = activeToDone.back();
+	clock_t min3 = activeToDone.front();
 
-	clock_t max4 = checkCollisions[checkCollisions.back()];;
-	clock_t min4 = checkCollisions[0];
+	clock_t max4 = checkCollisions.back();
+	clock_t min4 = checkCollisions.front();
 
-	clock_t max5 = updateLocations[updateLocations.back()];;
-	clock_t min5 = updateLocations[0];
+	clock_t max5 = updateLocations.back();
+	clock_t min5 = updateLocations.front();
 
-	clock_t max6 = userConsole[userConsole.back()];
-	clock_t min6 = userConsole[0];
+	clock_t max6 = userConsole.back();
+	clock_t min6 = userConsole.front();
 
 	ofstream out;
 	out.open(fileAddress);
