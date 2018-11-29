@@ -10,6 +10,7 @@
 #include <vector>
 #include <iostream>
 #include <pthread.h>
+#include <time.h>
 #include <thread>
 #include <fstream>
 #include <string>
@@ -17,8 +18,8 @@
 using namespace std;
 
 string fileAddress = "TrackFile.txt";
-int time = 0;
 
+int time = 0;
 
 const int height = 25000;
 const int width = 100000;
@@ -29,7 +30,16 @@ vector<Plane> released;	//contains planes that are released but not yet in activ
 vector<Plane> active;	//contains planes that are in active zone
 vector<Plane> done;		//contains planes that left the active zone or planes that will never get into the active zone
 
+clock_t tStart;
+clock_t tEnd;
 
+clock_t emptyBlock;
+vector<clock_t> orderedToReleased;
+vector<clock_t> releasedToActive;
+vector<clock_t> activeToDone;
+vector<clock_t> checkCollisions;
+vector<clock_t> updateLocations;
+vector<clock_t> userConsole;
 
 void updateLocation();
 bool isNeverEntering(Plane a);
@@ -84,8 +94,16 @@ void receiveBroadcast(Plane a) {
 
 	string outDirection = getExitDirection(a);
 
-	out << "has exited our airspace towards your airspace at the position x: " << a.getCurrentLocation().getX() << " y: " << a.getCurrentLocation().getY() << " z: " << a.getCurrentLocation().getZ() << ", over." << endl << endl;
-	cout << "has exited the airspace towards your airspace at the position x: " << a.getCurrentLocation().getX() << " y: " << a.getCurrentLocation().getY() << " z: " << a.getCurrentLocation().getZ() << ", over." << endl << endl;
+	out << "has exited our airspace towards your airspace at the position" 
+		<< " x: " << a.getCurrentLocation().getX() 
+		<< " y: " << a.getCurrentLocation().getY() 
+		<< " z: " << a.getCurrentLocation().getZ() 
+		<< ", over." << endl << endl;
+	cout << "has exited the airspace towards your airspace at the position" 
+		<< " x: " << a.getCurrentLocation().getX()
+		<< " y: " << a.getCurrentLocation().getY() 
+		<< " z: " << a.getCurrentLocation().getZ() 
+		<< ", over." << endl << endl;
 
 	out.close();
 
@@ -99,36 +117,34 @@ void request(Plane a, int messageType, int n = 1) {
 	out << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << " ---------" << endl;
 	cout << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << " ---------" << endl;
 
+	if (a.getUfo()) {
+		out << "UFO " << a.getId;
+		cout << "UFO " << a.getId;
+	}
+	else {
+		out << "Plane " << a.getId;
+		cout << "Plane " << a.getId;
+	}
+
 	switch (messageType) {
 	case 1: //Location Request
-		if (a.getUfo()) {
-			out << "UFO " << a.getId << ",ATC requests your current position, over." << endl << endl;
-			cout << "UFO " << a.getId << ",ATC requests your current position, over." << endl << endl;
-		}
-		else {
-		out << "Plane " << a.getId << ",ATC requests your current position, over." << endl << endl;
-		cout << "Plane " << a.getId << ",ATC requests your current position, over." << endl << endl;
-		}
+
+		out << ",ATC requests your current position, over." << endl << endl;
+		cout << ",ATC requests your current position, over." << endl << endl;
+
 		break;
 	case 2: //Velocity Request
-		if (a.getUfo()) {
-			out << "UFO " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
-			cout << "UFO " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
-		}
-		else {
-			out << "Plane " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
-			cout << "Plane " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
-		}
+
+		out << ",ATC requests your current velocity, over." << endl << endl;
+		cout << ",ATC requests your current velocity, over." << endl << endl;
+
 		break;
+
 	case 3: //Future Position Request
-		if (a.getUfo()) {
-			out << "UFO " << a.getId << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-			cout << "UFO " << a.getId << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-		}
-		else {
-			out << "Plane " << a.getId << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-			cout << "Plane " << a.getId << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-		}
+
+		out << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
+		cout << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
+
 		break;
 	default:
 		
@@ -146,37 +162,59 @@ void response(Plane a, int messageType, int n = 1) {
 
 	Location futureLoc = a.getFutureLocation(n);
 
+		if (a.getUfo()) {
+			out << "This is UFO " << a.getId;
+			cout << "This is UFO " << a.getId;
+		}
+		else {
+			out << "This is Plane " << a.getId;
+			cout << "This is Plane " << a.getId;
+		}
+
 	switch (messageType) {
 	case 1: //Location Request
-		if (a.getUfo()) {
-			out << "This is UFO " << a.getId << ", our current position is x: " << a.getCurrentLocation().getX() << " y: " << a.getCurrentLocation().getY() << " z: " << a.getCurrentLocation().getZ() << ", over." << endl << endl;
-			cout << "This is UFO " << a.getId << ", our current position is x: " << a.getCurrentLocation().getX() << " y: " << a.getCurrentLocation().getY() << " z: " << a.getCurrentLocation().getZ() << ", over." << endl << endl;
-		}
-		else {
-			out << "This is Plane " << a.getId << ", our current position is x: " << a.getCurrentLocation().getX() << " y: " << a.getCurrentLocation().getY() << " z: " << a.getCurrentLocation().getZ() << ", over." << endl << endl;
-			cout << "This is Plane " << a.getId << ", our current position is x: " << a.getCurrentLocation().getX() << " y: " << a.getCurrentLocation().getY() << " z: " << a.getCurrentLocation().getZ() << ", over." << endl << endl;
-		}
+
+		out << ", our current position is"
+			<< " x: " << a.getCurrentLocation().getX()
+			<< " y: " << a.getCurrentLocation().getY()
+			<< " z: " << a.getCurrentLocation().getZ()
+			<< ", over." << endl << endl;
+
+		cout << ", our current position is"
+			<< " x: " << a.getCurrentLocation().getX()
+			<< " y: " << a.getCurrentLocation().getY()
+			<< " z: " << a.getCurrentLocation().getZ()
+			<< ", over." << endl << endl;
+
 		break;
 	case 2: //Velocity Request
-		if (a.getUfo()) {
-			out << "This is UFO " << a.getId << ", our current velocity is vx: " << a.getCircleVelocity().getVx() << " vy: " << a.getCurrentVelocity().getVy() << " vz: " << a.getCurrentVelocity().getVz() << ", over." << endl << endl;
-			cout << "This is UFO " << a.getId << ", our current velocity is vx: " << a.getCircleVelocity().getVx() << " vy: " << a.getCurrentVelocity().getVy() << " vz: " << a.getCurrentVelocity().getVz() << ", over." << endl << endl;
-		}
-		else {
-			out << "This is Plane " << a.getId << ", our current velocity is vx: " << a.getCircleVelocity().getVx() << " vy: " << a.getCurrentVelocity().getVy() << " vz: " << a.getCurrentVelocity().getVz() << ", over." << endl << endl;
-			cout << "This is Plane " << a.getId << ", our current velocity is vx: " << a.getCircleVelocity().getVx() << " vy: " << a.getCurrentVelocity().getVy() << " vz: " << a.getCurrentVelocity().getVz() << ", over." << endl << endl;
-		}
+
+		out << ", our current velocity is"
+			<< " vx: " << a.getCircleVelocity().getVx()
+			<< " vy: " << a.getCurrentVelocity().getVy()
+			<< " vz: " << a.getCurrentVelocity().getVz()
+			<< ", over." << endl << endl;
+
+		cout << ", our current velocity is"
+			<< " vx: " << a.getCircleVelocity().getVx()
+			<< " vy: " << a.getCurrentVelocity().getVy()
+			<< " vz: " << a.getCurrentVelocity().getVz()
+			<< ", over." << endl << endl;
+
 		break;
 	case 3: //Future Position Request
-		
-		if (a.getUfo()) {
-			out << "This is UFO " << a.getId << ", our future position at time " << (time+n) << " is x: " << futureLoc.getX() << " y: " << futureLoc.getY() << " z: " << futureLoc.getZ() << ", over." << endl << endl;
-			cout << "This is UFO " << a.getId << ", our future position at time " << (time + n) << " is x: " << futureLoc.getX() << " y: " << futureLoc.getY() << " z: " << futureLoc.getZ() << ", over." << endl << endl;
-		}
-		else {
-			out << "This is Plane " << a.getId << ", our future position at time " << (time + n) << " is x: " << futureLoc.getX() << " y: " << futureLoc.getY() << " z: " << futureLoc.getZ() << ", over." << endl << endl;
-			cout << "This is Plane " << a.getId << ", our future position at time " << (time + n) << " is x: " << futureLoc.getX() << " y: " << futureLoc.getY() << " z: " << futureLoc.getZ() << ", over." << endl << endl;
-		}
+
+		out << ", our future position at time " << (time + n)
+			<< " is x: " << futureLoc.getX()
+			<< " y: " << futureLoc.getY()
+			<< " z: " << futureLoc.getZ()
+			<< ", over." << endl << endl;
+
+		cout << ", our future position at time " << (time + n)
+			<< " is x: " << futureLoc.getX()
+			<< " y: " << futureLoc.getY()
+			<< " z: " << futureLoc.getZ()
+			<< ", over." << endl << endl;
 		break;
 	default:
 
@@ -194,21 +232,26 @@ void collisionWarning(Plane a, Plane b) {
 	cout << " ********** SPORADIC COLLISION WARNING AT TIME " << time << " ********** " << endl;
 
 	if (a.getUfo() && b.getUfo()) {
-		out << "A collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
-		cout << "A collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		out << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl;
+		cout << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl;
 	}
 	else if (a.getUfo) {
-		out << "A collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
-		cout << "A collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		out << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl;
+		cout << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl;
 	}
 	else if (b.getUfo) {
-		out << "A collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
-		cout << "A collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		out << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl;
+		cout << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl;
 	}
 	else {
-		out << "A collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
-		cout << "A collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		out << "A possible collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl;
+		cout << "A possible collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl;
+			
 	}
+
+	out << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+	cout << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+
 
 	out.close();
 
@@ -225,21 +268,27 @@ void printHitList() {
 		Plane temp = active[i];
 
 		out << "ID: ";
+		cout << "ID: ";
 
 		if (temp.getUfo()) {
 			out << "Unknown , ";
+			cout << "Unknown , ";
 		}
 		else {
 			out << temp.getId() << " : ";
+			cout << temp.getId() << " : ";
 		}
 
-		out << " x : " << temp.getCurrentLocation.getX() << " , ";
-		out << " y : " << temp.getCurrentLocation.getY() << " , ";
-		out << " z : " << temp.getCurrentLocation.getZ() << " , ";
-		out << endl;
+		out << " x : " << temp.getCurrentLocation.getX() << " , "
+			<< " y : " << temp.getCurrentLocation.getY() << " , "
+			<< " z : " << temp.getCurrentLocation.getZ() << " , "
+			<< endl;
 
-		temp.print();
-		cout << endl;
+		cout << " x : " << temp.getCurrentLocation.getX() << " , "
+			<< " y : " << temp.getCurrentLocation.getY() << " , "
+			<< " z : " << temp.getCurrentLocation.getZ() << " , "
+			<< endl;
+
 	}
 
 	out << endl;
@@ -248,13 +297,89 @@ void printHitList() {
 	out.close();
 }
 
-//void printStatus() {
-//
-//	for (int p = 0; p < active.size(); p++) {
-//		active[p].print();
-//		cout << endl << endl;
-//	}
-//}
+void printResponseTimes() {
+	
+	sort(orderedToReleased.begin(), orderedToReleased.end());
+	sort(releasedToActive.begin(), releasedToActive.end());
+	sort(activeToDone.begin(), activeToDone.end());
+	sort(checkCollisions.begin(), checkCollisions.end());
+	sort(updateLocations.begin(), updateLocations.end());
+	sort(userConsole.begin(), userConsole.begin());
+
+	clock_t max1 = orderedToReleased.back();
+	clock_t min1 = orderedToReleased.front();
+
+	clock_t max2 = releasedToActive.back();
+	clock_t min2 = releasedToActive.front();
+
+	clock_t max3 = activeToDone.back();
+	clock_t min3 = activeToDone.front();
+
+	clock_t max4 = checkCollisions.back();
+	clock_t min4 = checkCollisions.front();
+
+	clock_t max5 = updateLocations.back();
+	clock_t min5 = updateLocations.front();
+
+	clock_t max6 = userConsole.back();
+	clock_t min6 = userConsole.front();
+
+	ofstream out;
+	out.open(fileAddress);
+
+	out << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
+		<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
+		<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
+		<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
+		<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
+		<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl
+		<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+
+	cout << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
+		<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
+		<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
+		<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
+		<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
+		<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl
+		<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+
+	out.close();
+
+}
+
+void emptyBlockTest() {
+	tStart = clock();
+	//Null Program
+	endClock(0);
+}
+
+void endClock(int processID) {
+	tEnd = clock();
+	switch (processID) {
+	case 0:
+		emptyBlock = tEnd - tStart;
+		break;
+	case 1:
+		orderedToReleased.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 2:
+		releasedToActive.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 3:
+		activeToDone.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 4:
+		checkCollisions.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 5:
+		updateLocations.push_back(tEnd - tStart - emptyBlock);
+		break;
+	case 6:
+		userConsole.push_back(tEnd - tStart - emptyBlock);
+		break;
+	default:
+	}
+}
 
 int main() {
 
@@ -281,6 +406,7 @@ int airplane_schedule[160] = {
 	19, 194, 184, 598, 35000, 0, 2000, 221
 };
 
+emptyBlockTest();
 
 
 //Read the List and put planes in the Ordered Vector
@@ -316,6 +442,8 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 
 //while (done.size() < sizeof(airplane_schedule) / sizeof(*airplane_schedule) / 8) {	//while time is running and planes are not done
 
+	tStart = clock();
+
 	//Check when first plane is released and store into Release array
 	if (ordered.size() != 0) {
 		if (ordered[0].getReleaseTime() >= time) {
@@ -324,6 +452,10 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 		}
 	}
 
+	endClock(1);
+
+	tStart = clock();
+
 	//Check when plane is active and store into Active zone
 	for (int i = 0; i < released.size(); i++) {
 		//checks if plane is in the active block
@@ -331,33 +463,51 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 			done.push_back(released[i]);
 			released.erase(released.begin() + i);	//erase plane from Released array
 		}
-		else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {	
+		else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {	
 			active.push_back(released[i]);			//put plane into Active array
+			receiveBroadcast(released[i]);			//Receive Message from other ATC about new plane
 			released.erase(ordered.begin() + i);	//erase plane from Released array
-			//TODO Send Console Message saying which ATC and which plane was sent with time
+			
 		}
 	}
 
+	endClock(2);
+
+	tStart = clock();
+
 	//Check when plane is gets out of active zone
 	for (int i = 0; i < active.size(); i++) {
-		if (active[i].isInsideTheBlock(active[i].getCurrentLocation, 100000, 100000, 25000, 0, 0, 0)) {
+		if (active[i].isInsideTheBlock(active[i].getCurrentLocation, width, depth, height, 0, 0, 0)) {
 			return;
 		}
 		else {
-			//TODO send message to user 
 			done.push_back(active[i]);			//plane is put into Done array
+			broadcast(active[i]);				//send message to next ATC
 			active.erase(active.begin() + i);	//erase plane from Active zone
 		}
 	}
 
+	endClock(3);
+
+	tStart = clock();
+
 	//Check for collisions in active list
 	checkForCollision();
+
+	endClock(4);
+
+	tStart = clock();
+
 	//update the location of all planes
 	updateLocation();
+
+	endClock(5);
 	
 //}
 
-printStatus();
+printHitList();
+
+printResponseTimes(); // Returns the max and min response time of main processes 
 
 system("pause");
 	return 0;
@@ -365,13 +515,13 @@ system("pause");
 
 
 //prints the status of the planes that are Active
-void printStatus() {
-
-	for (int p = 0; p < active.size(); p++) {
-		active[p].print();
-		cout << endl;
-	}
-}
+//void printStatus() {
+//
+//	for (int p = 0; p < active.size(); p++) {
+//		active[p].print();
+//		cout << endl;
+//	}
+//}
 
 //checks if plane never enters the active zone
 bool isNeverEntering(Plane a) {
@@ -390,7 +540,7 @@ void checkForCollision() {
 		for (int i = 0; i < active.size() - 1; i++) {
 			for (int j = i + 1; j < active.size(); j++) {
 				while (active[i].collisionCheck(active[j], 1)) { //check if two planes will collide at Time + 1
-					//TODO: Print Message saying collision could happen between active[i] and active[j]
+					collisionWarning(active[i], active[j]);
 					if (active[i].getCurrentVelocity().getVz < active[j].getCurrentVelocity().getVz()) {
 						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
 					}
@@ -405,9 +555,9 @@ void checkForCollision() {
 
 string getExitDirection(Plane a) {
 	string answer = "";
-	int eastDiff = abs(a.getCurrentLocation().getX() - 100000);
+	int eastDiff = abs(a.getCurrentLocation().getX() - width);
 	int westDiff = abs(a.getCurrentLocation().getX());
-	int northDiff = abs(a.getCurrentLocation().getY() - 100000);
+	int northDiff = abs(a.getCurrentLocation().getY() - depth);
 	int southDiff = abs(a.getCurrentLocation().getX());
 
 	int minimum = min(eastDiff, min(westDiff, min(northDiff, southDiff)));
