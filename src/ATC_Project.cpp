@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 string fileAddress = "TrackFile.txt";
@@ -29,16 +30,122 @@ vector<Plane> active;
 
 vector<Plane> done;
 
-void printStatus() {
-
-	for (int p = 0; p < active.size(); p++) {
-		active[p].print();
-		cout << endl;
-	}
-}
-
+string getExitDirection(Plane a);
 void checkForCollision();
 bool isNeverEntering(Plane a);
+
+void broadcast(Plane a) {
+
+	ofstream out;
+	out.open(fileAddress);
+
+	out << " -------- SPORADIC ATC BROADCAST AT TIME " << time << "---------" << endl << "Plane ";
+	cout << " -------- SPORADIC ATC BROADCAST AT TIME " << time << "---------" << endl << "Plane ";
+	
+	if (a.getUfo()) {
+		out << "with unknown ID ";
+		cout << "with unknown ID ";
+	}
+	else {
+		out << a.getId() << " ";
+		cout << a.getId() << " ";
+	}
+
+	string outDirection = getExitDirection(a);
+
+	out << "has exited the airspace towards the " << outDirection << " Sector." << endl << endl;
+	cout << "has exited the airspace towards the " << outDirection << " Sector." << endl << endl;
+
+	out.close();
+}
+
+void request(Plane a, int messageType) {
+
+	ofstream out;
+	out.open(fileAddress);
+
+	out << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << "---------" << endl;
+	cout << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << "---------" << endl;
+
+	switch (messageType) {
+	case 1: //Location Request
+		if (a.getUfo()) {
+			out << "UFO " << a.getId << ",ATC requests your current position, over." << endl << endl;
+			cout << "UFO " << a.getId << ",ATC requests your current position, over." << endl << endl;
+		}
+		else {
+		out << "Plane " << a.getId << ",ATC requests your current position, over." << endl << endl;
+		cout << "Plane " << a.getId << ",ATC requests your current position, over." << endl << endl;
+		}
+		break;
+	case 2: //Velocity Request
+		if (a.getUfo()) {
+			out << "UFO " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
+			cout << "UFO " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
+		}
+		else {
+			out << "Plane " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
+			cout << "Plane " << a.getId << ",ATC requests your current velocity, over." << endl << endl;
+		}
+		break;
+	case 3: //Future Position Request
+		if (a.getUfo()) {
+			out << "UFO " << a.getId << ",ATC requests your future position, over" << endl << endl;
+			cout << "UFO " << a.getId << ",ATC requests your future position, over" << endl << endl;
+		}
+		else {
+			out << "Plane " << a.getId << ",ATC requests your future position, over" << endl << endl;
+			cout << "Plane " << a.getId << ",ATC requests your future position, over" << endl << endl;
+		}
+		break;
+	default:
+		
+	}
+
+	out.close();
+}
+
+void printHitList() {
+	ofstream out;
+	out.open(fileAddress);
+
+	out << " -------- PERIODIC HIT LIST AT TIME " << time <<" -------- " << endl;
+	cout << " -------- PERIODIC HIT LIST AT TIME " << time << " -------- " << endl;
+	
+	for (int i = 0; i < active.size(); i++) {
+		Plane temp = active[i];
+
+		out << "ID: ";
+
+		if (temp.getUfo()) {
+			out << "Unknown , ";
+		}
+		else {
+			out << temp.getId() << " : ";
+		}
+
+		out << " x : " << temp.getCurrentLocation.getX() << " , ";
+		out << " y : " << temp.getCurrentLocation.getY() << " , ";
+		out << " z : " << temp.getCurrentLocation.getZ() << " , ";
+		out << endl;
+
+		temp.print();
+		cout << endl;
+	}
+
+	out << endl;
+	cout << endl;
+
+	out.close();
+}
+
+//void printStatus() {
+//
+//	for (int p = 0; p < active.size(); p++) {
+//		active[p].print();
+//		cout << endl << endl;
+//	}
+//}
 
 int main() {
 
@@ -156,6 +263,29 @@ void checkForCollision() {
 	}
 }
 
+string getExitDirection(Plane a) {
+	string answer = "";
+	int eastDiff = abs(a.getCurrentLocation().getX() - 100000);
+	int westDiff = abs(a.getCurrentLocation().getX());
+	int northDiff = abs(a.getCurrentLocation().getY() - 100000);
+	int southDiff = abs(a.getCurrentLocation().getX());
+
+	int minimum = min(eastDiff, min(westDiff, min(northDiff, southDiff)));
+
+	if (eastDiff == minimum) {
+		return "East";
+	}
+	else if (westDiff == minimum) {
+		return "West";
+	}
+	else if (northDiff == minimum) {
+		return "North";
+	}
+	else {
+		return "South";
+	}
+
+}
 
 
 //PARAMETERS OF PROJECT

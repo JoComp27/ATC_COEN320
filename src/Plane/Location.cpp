@@ -65,7 +65,7 @@ void setPosition(int x, int y, int z){
 
 void print(){
 
-	cout << "Current Position: (x = " << x  << ", y = " << y << ",z = " << z << ")"<< endl;
+	cout << "x : " << x  << " , y : " << y << " , z : " << z << " , ";
 
 }
 
