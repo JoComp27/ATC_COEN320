@@ -47,7 +47,7 @@ int getVz() const{
 
 void print(){
 
-	cout << "Current Velocity: (vx = " << vx << ", vy = " << vy << ", vz = " << vz << " )" << endl;
+	cout << "vx : " << vx << " , vy : " << vy <<  ", vz : " << vz;
 
 }
 

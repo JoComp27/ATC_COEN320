@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 using namespace std;
 
@@ -17,6 +18,7 @@ using namespace std;
 #define PLANE_PLANE_H_
 
 static int ufoId = 0;
+string fileAddress = "TrackFile.txt";
 
 class Plane {
 private:
@@ -39,7 +41,6 @@ private:
 
 	bool ufo = false;
 	bool isHolding = false;
-
 
 public:
 
@@ -96,13 +97,16 @@ public:
 		return releaseTime;
 	}
 
-
 	Location getSpawnLocation() const{
 		return spawnLocation;
 	}
 
 	Location getWantedLocation() const{
 		return wantedLocation;
+	}
+
+	int getId() const {
+		return id;
 	}
 
 	Location getFutureLocation(int time){
@@ -118,6 +122,10 @@ public:
 			i++;
 		}
 		this->wantedLocation = getFutureLocation(i);
+	}
+
+	bool getUfo() {
+		return ufo;
 	}
 
 	bool isInsideTheBlock(Location location, int maxX, int maxY, int maxZ, int minX, int minY, int minZ){
@@ -190,11 +198,13 @@ public:
 	}
 
 	void print(){
-		cout << "Plane ";
+		cout << "ID : ";
 		if(ufo){
-			cout << "UFO";
+			cout << "Unknown , ";
 		}
-		cout << id << ": ";
+		else {
+			cout << id << " , ";
+		}
 		currentLocation.print();
 		currentVelocity.print();
 	}
