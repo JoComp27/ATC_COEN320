@@ -42,8 +42,6 @@ private:
 	bool ufo = false;
 	bool isHolding = false;
 
-	void;
-
 public:
 
 	Plane(int id, int vx, int vy, int vz, int x, int y, int z, int releaseTime){
