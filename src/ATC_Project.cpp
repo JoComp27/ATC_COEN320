@@ -9,7 +9,7 @@
 #include "./Plane/Plane.cpp"
 #include <vector>
 #include <iostream>
-//#include <pthread.h> were you looking this -> <thread>?
+#include <pthread.h>
 #include <thread>
 #include <fstream>
 #include <string>
