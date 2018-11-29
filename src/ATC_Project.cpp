@@ -292,21 +292,27 @@ void printHitList() {
 		Plane temp = active[i];
 
 		out << "ID: ";
+		cout << "ID: ";
 
 		if (temp.getUfo()) {
 			out << "Unknown , ";
+			cout << "Unknown , ";
 		}
 		else {
 			out << temp.getId() << " : ";
+			cout << temp.getId() << " : ";
 		}
 
-		out << " x : " << temp.getCurrentLocation.getX() << " , ";
-		out << " y : " << temp.getCurrentLocation.getY() << " , ";
-		out << " z : " << temp.getCurrentLocation.getZ() << " , ";
-		out << endl;
+		out << " x : " << temp.getCurrentLocation.getX() << " , "
+			<< " y : " << temp.getCurrentLocation.getY() << " , "
+			<< " z : " << temp.getCurrentLocation.getZ() << " , "
+			<< endl;
 
-		temp.print();
-		cout << endl;
+		cout << " x : " << temp.getCurrentLocation.getX() << " , "
+			<< " y : " << temp.getCurrentLocation.getY() << " , "
+			<< " z : " << temp.getCurrentLocation.getZ() << " , "
+			<< endl;
+
 	}
 
 	out << endl;
@@ -314,14 +320,6 @@ void printHitList() {
 
 	out.close();
 }
-
-//void printStatus() {
-//
-//	for (int p = 0; p < active.size(); p++) {
-//		active[p].print();
-//		cout << endl << endl;
-//	}
-//}
 
 int main() {
 
@@ -398,7 +396,7 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 			done.push_back(released[i]);
 			released.erase(released.begin() + i);	//erase plane from Released array
 		}
-		else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {	
+		else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {	
 			active.push_back(released[i]);			//put plane into Active array
 			released.erase(ordered.begin() + i);	//erase plane from Released array
 			//TODO Send Console Message saying which ATC and which plane was sent with time
@@ -407,7 +405,7 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 
 	//Check when plane is gets out of active zone
 	for (int i = 0; i < active.size(); i++) {
-		if (active[i].isInsideTheBlock(active[i].getCurrentLocation, 100000, 100000, 25000, 0, 0, 0)) {
+		if (active[i].isInsideTheBlock(active[i].getCurrentLocation, width, depth, height, 0, 0, 0)) {
 			return;
 		}
 		else {
@@ -472,9 +470,9 @@ void checkForCollision() {
 
 string getExitDirection(Plane a) {
 	string answer = "";
-	int eastDiff = abs(a.getCurrentLocation().getX() - 100000);
+	int eastDiff = abs(a.getCurrentLocation().getX() - width);
 	int westDiff = abs(a.getCurrentLocation().getX());
-	int northDiff = abs(a.getCurrentLocation().getY() - 100000);
+	int northDiff = abs(a.getCurrentLocation().getY() - depth);
 	int southDiff = abs(a.getCurrentLocation().getX());
 
 	int minimum = min(eastDiff, min(westDiff, min(northDiff, southDiff)));

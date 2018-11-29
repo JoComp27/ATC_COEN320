@@ -207,6 +207,7 @@ public:
 		}
 		currentLocation.print();
 		currentVelocity.print();
+		cout << endl;
 	}
 
 };
