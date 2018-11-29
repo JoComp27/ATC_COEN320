@@ -9,33 +9,27 @@
 #include "./Plane/Plane.cpp"
 #include <vector>
 #include <iostream>
+#include <pthread.h>
 using namespace std;
 
-int time = 0;
+int time = 0;	//need to implement real time
 
 const int height = 25000;
 const int width = 100000;
 const int depth = 100000;
 
-vector<Plane> ordered;
+vector<Plane> ordered;	//contains planes ordered by released time
+vector<Plane> released;	//contains planes that are released but not yet in active zone
+vector<Plane> active;	//contains planes that are in active zone
+vector<Plane> done;		//contains planes that left the active zone or planes that will never get into the active zone
 
-vector<Plane> released;
 
-vector<Plane> active;
 
-vector<Plane> done;
+void updateLocation();
+bool isNeverEntering(Plane a);
+void checkForCollision();
+void printStatus();
 
-void printStatus() {
-
-	for (int p = 0; p < active.size(); p++) {
-		active[p].print();
-		cout << endl;
-	}
-}
-
-void printHitList() {
-	cout << 
-}
 
 int main() {
 
@@ -87,41 +81,56 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 				ordered.insert(p + ordered.begin(), plane);
 				break;
 			}
-			else if( p == size -1){						//if release time is larger than the last plane release time 
+			else if( p == size -1){		//if release time is larger than the last plane release time 
 				ordered.push_back(plane);
 			}
 		}
 	}
-}
+}	//finished sorting the planes in ordered list
 
 
-while (done.size() < ordered.size()) {	//while time is running and planes are not done
+//while (done.size() < sizeof(airplane_schedule) / sizeof(*airplane_schedule) / 8) {	//while time is running and planes are not done
 
-	//Check when released and store into Release array
-	for (int i = 0; i < ordered.size(); i++) {
-		if (ordered[i].getReleaseTime() >= time) {
-			released.push_back(ordered[i]);
-			ordered.erase(ordered.begin() + i);
+	//Check when first plane is released and store into Release array
+	if (ordered.size() != 0) {
+		if (ordered[0].getReleaseTime() >= time) {
+			released.push_back(ordered[0]);	//put the plane into release array
+			ordered.erase(ordered.begin());	//erase the plane from the ordered array
 		}
-
 	}
 
-	//Check when active and store into Active array
+	//Check when plane is active and store into Active zone
 	for (int i = 0; i < released.size(); i++) {
-		if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {
-			active.push_back(released[i]);
-			//Send Console Message saying which ATC and which plane was sent
-		}
-		else if (isNeverEntering(released[i])) {
+		//checks if plane is in the active block
+		if (isNeverEntering(released[i])) {
 			done.push_back(released[i]);
-			released.erase(released.begin() + i);
+			released.erase(released.begin() + i);	//erase plane from Released array
+		}
+		else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {	
+			active.push_back(released[i]);			//put plane into Active array
+			released.erase(ordered.begin() + i);	//erase plane from Released array
+			//TODO Send Console Message saying which ATC and which plane was sent with time
 		}
 	}
 
-	//Check for active list
-	checkForCollision();
+	//Check when plane is gets out of active zone
+	for (int i = 0; i < active.size(); i++) {
+		if (active[i].isInsideTheBlock(active[i].getCurrentLocation, 100000, 100000, 25000, 0, 0, 0)) {
+			return;
+		}
+		else {
+			//TODO send message to user 
+			done.push_back(active[i]);			//plane is put into Done array
+			active.erase(active.begin() + i);	//erase plane from Active zone
+		}
+	}
 
-}
+	//Check for collisions in active list
+	checkForCollision();
+	//update the location of all planes
+	updateLocation();
+	
+//}
 
 printStatus();
 
@@ -129,6 +138,17 @@ system("pause");
 	return 0;
 }
 
+
+//prints the status of the planes that are Active
+void printStatus() {
+
+	for (int p = 0; p < active.size(); p++) {
+		active[p].print();
+		cout << endl;
+	}
+}
+
+//checks if plane never enters the active zone
 bool isNeverEntering(Plane a) {
 	bool x = a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0 || a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx < 0;
 	bool y = a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0 || a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy < 0;
@@ -138,21 +158,37 @@ bool isNeverEntering(Plane a) {
 }
 
 void checkForCollision() {
-	if (active.size() < 2) {
+	if (active.size() < 2) { //No need to check for collisions if less than two planes inside active area
 		return;
 	}
-	else {
+	else {		//go through active array and check for collisions
 		for (int i = 0; i < active.size() - 1; i++) {
-			for (int j = i+1; j < active.size(); j++) {
-				while (active[i].collisionCheck(active[j], 1)) {
+			for (int j = i + 1; j < active.size(); j++) {
+				while (active[i].collisionCheck(active[j], 1)) { //check if two planes will collide at Time + 1
 					//TODO: Print Message saying collision could happen between active[i] and active[j]
-					//TODO : Attempt to fix the issue
+					if (active[i].getCurrentVelocity().getVz < active[j].getCurrentVelocity().getVz()) {
+						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
+					}
+					else {
+						active[i].redirect(active[j]);
+					}
 				}
 			}
 		}
 	}
 }
 
+void updateLocation() {
+	for (auto& plane : released) {
+		plane.updateLocation();
+	}
+	for (auto& plane : active) {
+		plane.updateLocation();
+	}
+	for (auto& plane : done) {
+		plane.updateLocation();
+	}
+}
 
 
 //PARAMETERS OF PROJECT
