@@ -185,6 +185,35 @@ void response(Plane a, int messageType, int n = 1) {
 	out.close();
 }
 
+void collisionWarning(Plane a, Plane b) {
+
+	ofstream out;
+	out.open(fileAddress);
+
+	out << " ********** SPORADIC COLLISION WARNING AT TIME " << time << " ********** " << endl;
+	cout << " ********** SPORADIC COLLISION WARNING AT TIME " << time << " ********** " << endl;
+
+	if (a.getUfo() && b.getUfo()) {
+		out << "A collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		cout << "A collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+	}
+	else if (a.getUfo) {
+		out << "A collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		cout << "A collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+	}
+	else if (b.getUfo) {
+		out << "A collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		cout << "A collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+	}
+	else {
+		out << "A collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+		cout << "A collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+	}
+
+	out.close();
+
+}
+
 void printHitList() {
 	ofstream out;
 	out.open(fileAddress);
