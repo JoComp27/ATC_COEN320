@@ -545,6 +545,24 @@ void checkForCollision() {
 						active[i].redirect(active[j]);
 					}
 				}
+				while (active[i].collisionCheck(active[j], 2)) { //check if two planes will collide at Time + 2
+					collisionWarning(active[i], active[j]);
+					if (active[i].getCurrentVelocity().getVz < active[j].getCurrentVelocity().getVz()) {
+						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
+					}
+					else {
+						active[i].redirect(active[j]);
+					}
+				}
+				while (active[i].collisionCheck(active[j], 3)) { //check if two planes will collide at Time + 3
+					collisionWarning(active[i], active[j]);
+					if (active[i].getCurrentVelocity().getVz < active[j].getCurrentVelocity().getVz()) {
+						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
+					}
+					else {
+						active[i].redirect(active[j]);
+					}
+				}
 			}
 		}
 	}
