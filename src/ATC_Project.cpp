@@ -118,12 +118,12 @@ void request(Plane a, int messageType, int n = 1) {
 	cout << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << " ---------" << endl;
 
 	if (a.getUfo()) {
-		out << "UFO " << a.getId;
-		cout << "UFO " << a.getId;
+		out << "UFO " << a.getId();
+		cout << "UFO " << a.getId();
 	}
 	else {
-		out << "Plane " << a.getId;
-		cout << "Plane " << a.getId;
+		out << "Plane " << a.getId();
+		cout << "Plane " << a.getId();
 	}
 
 	switch (messageType) {
@@ -146,8 +146,6 @@ void request(Plane a, int messageType, int n = 1) {
 		cout << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
 
 		break;
-	default:
-		
 	}
 
 	out.close();
@@ -163,12 +161,12 @@ void response(Plane a, int messageType, int n = 1) {
 	Location futureLoc = a.getFutureLocation(n);
 
 		if (a.getUfo()) {
-			out << "This is UFO " << a.getId;
-			cout << "This is UFO " << a.getId;
+			out << "This is UFO " << a.getId();
+			cout << "This is UFO " << a.getId();
 		}
 		else {
-			out << "This is Plane " << a.getId;
-			cout << "This is Plane " << a.getId;
+			out << "This is Plane " << a.getId();
+			cout << "This is Plane " << a.getId();
 		}
 
 	switch (messageType) {
@@ -216,8 +214,6 @@ void response(Plane a, int messageType, int n = 1) {
 			<< " z: " << futureLoc.getZ()
 			<< ", over." << endl << endl;
 		break;
-	default:
-
 	}
 
 	out.close();
@@ -235,11 +231,11 @@ void collisionWarning(Plane a, Plane b) {
 		out << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl;
 		cout << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl;
 	}
-	else if (a.getUfo) {
+	else if (a.getUfo()) {
 		out << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl;
 		cout << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl;
 	}
-	else if (b.getUfo) {
+	else if (b.getUfo()) {
 		out << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl;
 		cout << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl;
 	}
@@ -279,14 +275,14 @@ void printHitList() {
 			cout << temp.getId() << " : ";
 		}
 
-		out << " x : " << temp.getCurrentLocation.getX() << " , "
-			<< " y : " << temp.getCurrentLocation.getY() << " , "
-			<< " z : " << temp.getCurrentLocation.getZ() << " , "
+		out << " x : " << temp.getCurrentLocation().getX() << " , "
+			<< " y : " << temp.getCurrentLocation().getY() << " , "
+			<< " z : " << temp.getCurrentLocation().getZ() << " , "
 			<< endl;
 
-		cout << " x : " << temp.getCurrentLocation.getX() << " , "
-			<< " y : " << temp.getCurrentLocation.getY() << " , "
-			<< " z : " << temp.getCurrentLocation.getZ() << " , "
+		cout << " x : " << temp.getCurrentLocation().getX() << " , "
+			<< " y : " << temp.getCurrentLocation().getY() << " , "
+			<< " z : " << temp.getCurrentLocation().getZ() << " , "
 			<< endl;
 
 	}
@@ -377,7 +373,6 @@ void endClock(int processID) {
 	case 6:
 		userConsole.push_back(tEnd - tStart - emptyBlock);
 		break;
-	default:
 	}
 }
 
@@ -477,7 +472,7 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 
 	//Check when plane is gets out of active zone
 	for (int i = 0; i < active.size(); i++) {
-		if (!active[i].isInsideTheBlock(active[i].getCurrentLocation, width, depth, height, 0, 0, 0)) {
+		if (!active[i].isInsideTheBlock(active[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
 			done.push_back(active[i]);			//plane is put into Done array
 			broadcast(active[i]);				//send message to next ATC
 			active.erase(active.begin() + i);	//erase plane from Active zone
@@ -522,9 +517,9 @@ system("pause");
 
 //checks if plane never enters the active zone
 bool isNeverEntering(Plane a) {
-	bool x = a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0 || a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx < 0;
-	bool y = a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0 || a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy < 0;
-	bool z = a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0 || a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz < 0;
+	bool x = a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0 || a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx() < 0;
+	bool y = a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0 || a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy() < 0;
+	bool z = a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0 || a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz() < 0;
 
 	return x || y || z;
 }
@@ -538,7 +533,7 @@ void checkForCollision() {
 			for (int j = i + 1; j < active.size(); j++) {
 				while (active[i].collisionCheck(active[j], 1)) { //check if two planes will collide at Time + 1
 					collisionWarning(active[i], active[j]);
-					if (active[i].getCurrentVelocity().getVz < active[j].getCurrentVelocity().getVz()) {
+					if (active[i].getCurrentVelocity().getVz() < active[j].getCurrentVelocity().getVz()) {
 						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
 					}
 					else {
