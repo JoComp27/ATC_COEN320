@@ -692,7 +692,7 @@ void printResponseTimes() {
 	out.close();
 }
 
-}
+
 
 void endClock(int processID) {
 	tEnd = clock();
