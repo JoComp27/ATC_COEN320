@@ -46,6 +46,8 @@ vector<clock_t> checkCollisions;
 vector<clock_t> updateLocations;
 vector<clock_t> userConsole;
 
+vector<string> fileOutput;
+
 static int ufoId = 0;
 
 void updateLocation();
@@ -53,6 +55,8 @@ void checkForCollision();
 chrono::steady_clock::time_point beginTime;
 
 mutex infoMtxLock;
+
+ofstream out;
 
 class Velocity {
 public:
@@ -282,8 +286,8 @@ public:
 
 	//redirect a plane in case of future collision
 	void redirect(Plane planeGoDown) {
-		setCurrentVelocity(currentVelocity.getVx(), currentVelocity.getVy(), currentVelocity.getVz() + 10);
-		planeGoDown.setCurrentVelocity(planeGoDown.getCurrentVelocity().getVx(), planeGoDown.getCurrentVelocity().getVy(), planeGoDown.getCurrentVelocity().getVz() - 10);
+		setCurrentVelocity(currentVelocity.getVx(), currentVelocity.getVy(), currentVelocity.getVz() + 50);
+		planeGoDown.setCurrentVelocity(planeGoDown.getCurrentVelocity().getVx(), planeGoDown.getCurrentVelocity().getVy(), planeGoDown.getCurrentVelocity().getVz() - 50);
 		setWantedLocation();				//set the exit location
 		planeGoDown.setWantedLocation();	//set the exit location
 	}
@@ -366,62 +370,55 @@ int getTime() {
 
 void broadcast(Plane a) {
 
-	double diffTime = getTime();
+	int diffTime = getTime();
 
-	ofstream out;
-	out.open(fileAddress);
 
-	out << " -------- SPORADIC ATC BROADCAST AT TIME " << diffTime << " ---------" << endl << "Plane ";
+	fileOutput.push_back(" -------- SPORADIC ATC BROADCAST AT TIME " + to_string(diffTime) + " ---------\n" "Plane ");
 	cout << " -------- SPORADIC ATC BROADCAST AT TIME " << diffTime << " ---------" << endl << "Plane ";
 
 	if (a.getUfo()) {
-		out << "with unknown ID ";
+		fileOutput.push_back("with unknown ID ");
 		cout << "with unknown ID ";
 	}
 	else {
-		out << a.getId() << " ";
+		fileOutput.push_back(a.getId() + " ");
 		cout << a.getId() << " ";
 	}
 
 	string outDirection = getExitDirection(a);
 
-	out << "has exited our airspace towards the " << outDirection << " Sector, over." << endl << endl;
+	fileOutput.push_back("has exited our airspace towards the " + outDirection + " Sector, over.\n\n");
 	cout << "has exited our airspace towards the " << outDirection << " Sector, over." << endl << endl;
-
-	out.close();
 }
 
 void receiveBroadcast(Plane a) {
 	double diffTime = getTime();
-	ofstream out;
-	out.open(fileAddress);
+	
 
-	out << " -------- SPORADIC ATC BROADCAST RECEPTION AT TIME " << diffTime << " ---------" << endl << "A Plane ";
+	fileOutput.push_back(" -------- SPORADIC ATC BROADCAST RECEPTION AT TIME " + to_string(diffTime) + " ---------\n A Plane ");
 	cout << " -------- SPORADIC ATC BROADCAST RECEPTION AT TIME " << diffTime << " ---------" << endl << "A Plane ";
 
 	if (a.getUfo()) {
-		out << "with unknown ID ";
+		fileOutput.push_back("with unknown ID ");
 		cout << "with unknown ID ";
 	}
 	else {
-		out << a.getId() << " ";
+		fileOutput.push_back(to_string(a.getId()) + " ");
 		cout << a.getId() << " ";
 	}
 
 	string outDirection = getExitDirection(a);
 
-	out << "has entered your airspace at the position"
-		<< " x: " << a.getCurrentLocation().getX()
-		<< " y: " << a.getCurrentLocation().getY()
-		<< " z: " << a.getCurrentLocation().getZ()
-		<< ", over." << endl << endl;
+	fileOutput.push_back("has entered your airspace at the position x: " + to_string(a.getCurrentLocation().getX())
+		+ " y: " + to_string(a.getCurrentLocation().getY())
+		+ " z: " + to_string(a.getCurrentLocation().getZ())
+		+ ", over.\n\n");
 	cout << "has entered the airspace towards your airspace at the position"
 		<< " x: " << a.getCurrentLocation().getX()
 		<< " y: " << a.getCurrentLocation().getY()
 		<< " z: " << a.getCurrentLocation().getZ()
 		<< ", over." << endl << endl;
 
-	out.close();
 
 }
 
@@ -431,49 +428,43 @@ void request(Plane &a, int messageType, int n = 1) {
 	while (!infoMtxLock.try_lock()) {
 	}
 
-	ofstream out;
-	out.open(fileAddress);
-
-	out << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << diffTime << " ---------" << endl;
+	fileOutput.push_back(" -------- SPORADIC ATC TO PLANE REQUEST AT TIME " + to_string(diffTime) + " ---------\n");
 	cout << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << diffTime << " ---------" << endl;
 
 	if (a.getUfo()) {
-		out << "UFO " << a.getId();
+		fileOutput.push_back("UFO " + to_string(a.getId()));
 		cout << "UFO " << a.getId();
 	}
 	else {
-		out << "Plane " << a.getId();
+		fileOutput.push_back("Plane " + to_string(a.getId()));
 		cout << "Plane " << a.getId();
 	}
 
 	switch (messageType) {
 	case 1: //Location Request
 
-		out << ",ATC requests your current position, over." << endl << endl;
+		fileOutput.push_back(",ATC requests your current position, over.");
 		cout << ",ATC requests your current position, over." << endl << endl;
 
 		break;
 	case 2: //Velocity Request
 
-		out << ",ATC requests your current velocity, over." << endl << endl;
+		fileOutput.push_back(",ATC requests your current velocity, over.");
 		cout << ",ATC requests your current velocity, over." << endl << endl;
 
 		break;
 
 	case 3: //Future Position Request
 
-		out << ",ATC requests your future position at time " << (diffTime + n) << ", over" << endl << endl;
+		fileOutput.push_back(",ATC requests your future position at time " + to_string(diffTime + n) + ", over") ;
 		cout << ",ATC requests your future position at time " << (diffTime + n) << ", over" << endl << endl;
 
 		break;
 	case 4: //Elevation Change request
-		out << ",ATC requests an elevation change of " << n << "000, over" << endl << endl;
+		fileOutput.push_back(",ATC requests an elevation change of " + to_string(n) + "000, over");
 		cout << ",ATC requests an elevation change of " << n << "000, over" << endl << endl;
 	}
 
-
-
-	out.close();
 	infoMtxLock.unlock();
 }
 
@@ -482,31 +473,27 @@ void response(Plane &a, int messageType, int n = 1) {
 	while (!infoMtxLock.try_lock()) {
 	}
 
-	ofstream out;
-	out.open(fileAddress);
-
-	out << " -------- SPORADIC PLANE RESPONSE AT TIME " << diffTime << " ---------" << endl;
+	fileOutput.push_back("-------- SPORADIC PLANE RESPONSE AT TIME " + to_string(diffTime) + " ---------");
 	cout << " -------- SPORADIC PLANE RESPONSE AT TIME " << diffTime << " ---------" << endl;
 
 	Location futureLoc = a.getFutureLocation(n);
 
 	if (a.getUfo()) {
-		out << "This is UFO " << a.getId();
+		fileOutput.push_back("This is UFO " + a.getId());
 		cout << "This is UFO " << a.getId();
 	}
 	else {
-		out << "This is Plane " << a.getId();
+		fileOutput.push_back("This is Plane " + a.getId());
 		cout << "This is Plane " << a.getId();
 	}
 
 	switch (messageType) {
 	case 1: //Location Request
 
-		out << ", our current position is"
-			<< " x: " << a.getCurrentLocation().getX()
-			<< " y: " << a.getCurrentLocation().getY()
-			<< " z: " << a.getCurrentLocation().getZ()
-			<< ", over." << endl << endl;
+		fileOutput.push_back(", our current position is x: " + to_string(a.getCurrentLocation().getX())
+			+ " y: " + to_string(a.getCurrentLocation().getY())
+			+ " z: " + to_string(a.getCurrentLocation().getZ())
+			+ ", over.");
 
 		cout << ", our current position is"
 			<< " x: " << a.getCurrentLocation().getX()
@@ -517,11 +504,10 @@ void response(Plane &a, int messageType, int n = 1) {
 		break;
 	case 2: //Velocity Request
 
-		out << ", our current velocity is"
-			<< " vx: " << a.getCircleVelocity().getVx()
-			<< " vy: " << a.getCurrentVelocity().getVy()
-			<< " vz: " << a.getCurrentVelocity().getVz()
-			<< ", over." << endl << endl;
+		fileOutput.push_back(", our current velocity is vx: " + to_string(a.getCircleVelocity().getVx())
+			+ " vy: " + to_string(a.getCurrentVelocity().getVy())
+			+ " vz: " + to_string(a.getCurrentVelocity().getVz())
+			+ ", over.");
 
 		cout << ", our current velocity is"
 			<< " vx: " << a.getCircleVelocity().getVx()
@@ -532,11 +518,11 @@ void response(Plane &a, int messageType, int n = 1) {
 		break;
 	case 3: //Future Position Request
 
-		out << ", our future position at time " << (diffTime + n)
-			<< " is x: " << futureLoc.getX()
-			<< " y: " << futureLoc.getY()
-			<< " z: " << futureLoc.getZ()
-			<< ", over." << endl << endl;
+		fileOutput.push_back(", our future position at time " + to_string(diffTime + n)
+			+ " is x: " + to_string(futureLoc.getX())
+			+ " y: " + to_string(futureLoc.getY())
+			+ " z: " + to_string(futureLoc.getZ())
+			+ ", over.");
 
 		cout << ", our future position at time " << (diffTime + n)
 			<< " is x: " << futureLoc.getX()
@@ -546,45 +532,40 @@ void response(Plane &a, int messageType, int n = 1) {
 		break;
 	case 4: //Change altitude Response
 		a.setCurrentPosition(a.getCurrentLocation().getX(), a.getCurrentLocation().getY(), a.getCurrentLocation().getZ() + n * 1000);
-		out << " We have received your message and have changed our altitude by " << n << "000, over" << endl << endl;
+		fileOutput.push_back(" We have received your message and have changed our altitude by " + to_string(n) + "000, over");
 		cout << " We have received your message and have changed our altitude by " << n << "000, over" << endl << endl;
 	}
 
-	out.close();
 	infoMtxLock.unlock();
 }
 
 void collisionWarning(Plane a, Plane b) {
 	double diffTime = getTime();
-	ofstream out;
-	out.open(fileAddress);
 
-	out << " ********** SPORADIC COLLISION WARNING AT TIME " << diffTime << " ********** " << endl;
+	fileOutput.push_back(" ********** SPORADIC COLLISION WARNING AT TIME " + to_string(diffTime) + " ********** ");
 	cout << " ********** SPORADIC COLLISION WARNING AT TIME " << diffTime << " ********** " << endl;
 
 	if (a.getUfo() && b.getUfo()) {
-		out << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl;
+		fileOutput.push_back("A possible collision has been detected between UFO " + to_string(a.getId()) + " and UFO " + to_string(b.getId()));
 		cout << "A possible collision has been detected between UFO " << a.getId() << " and UFO " << b.getId() << endl;
 	}
 	else if (a.getUfo()) {
-		out << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl;
+		fileOutput.push_back("A possible collision has been detected between UFO " + to_string(a.getId()) + " and UFO " + to_string(b.getId()));
 		cout << "A possible collision has been detected between UFO " << a.getId() << " and Plane " << b.getId() << endl;
 	}
 	else if (b.getUfo()) {
-		out << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl;
+		fileOutput.push_back("A possible collision has been detected between Plane " + to_string(a.getId()) + " and UFO " + to_string(b.getId()));
 		cout << "A possible collision has been detected between Plane " << a.getId() << " and UFO " << b.getId() << endl;
 	}
 	else {
-		out << "A possible collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl;
+		fileOutput.push_back("A possible collision has been detected between Plane " + to_string(a.getId()) + " and UFO " + to_string(b.getId()));
 		cout << "A possible collision has been detected between Plane " << a.getId() << " and Plane " << b.getId() << endl;
 
 	}
 
-	out << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
+	fileOutput.push_back("Making Appropriate Flight Path Changes to Avoid Collision");
 	cout << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
 
-
-	out.close();
 
 }
 
@@ -593,31 +574,27 @@ void printHitList() {
 	while (!infoMtxLock.try_lock()) {
 	}
 
-	ofstream out;
-	out.open(fileAddress);
 
-	out << " -------- PERIODIC HIT LIST AT TIME " << diffTime << " -------- " << endl;
+	fileOutput.push_back(" -------- PERIODIC HIT LIST AT TIME " + to_string(diffTime) + " -------- \n");
 	cout << " -------- PERIODIC HIT LIST AT TIME " << diffTime << " -------- " << endl;
 
 	for (unsigned int i = 0; i < active.size(); i++) {
 		Plane temp = active[i];
 
-		out << "ID: ";
+		fileOutput.push_back("ID: ");
 		cout << "ID: ";
 
 		if (temp.getUfo()) {
-			out << "Unknown , ";
+			fileOutput.push_back("Unknown , ");
 			cout << "Unknown , ";
 		}
 		else {
-			out << temp.getId() << " : ";
+			fileOutput.push_back(temp.getId() + " : ");
 			cout << temp.getId() << " : ";
 		}
 
-		out << " x : " << temp.getCurrentLocation().getX() << " , "
-			<< " y : " << temp.getCurrentLocation().getY() << " , "
-			<< " z : " << temp.getCurrentLocation().getZ() << " , "
-			<< endl;
+		fileOutput.push_back(" x : " + to_string(temp.getCurrentLocation().getX()) + " , "
+			+ " y : " + to_string(temp.getCurrentLocation().getY()) + " , z : " + to_string(temp.getCurrentLocation().getZ()) + " , ");
 
 		cout << " x : " << temp.getCurrentLocation().getX() << " , "
 			<< " y : " << temp.getCurrentLocation().getY() << " , "
@@ -626,10 +603,9 @@ void printHitList() {
 
 	}
 
-	out << endl;
+	fileOutput.push_back("\n");
 	cout << endl;
 
-	out.close();
 	infoMtxLock.unlock();
 }
 
@@ -661,15 +637,11 @@ void printResponseTimes() {
 		//clock_t max6 = userConsole.back();
 		//clock_t min6 = userConsole.front();
 
-		ofstream out;
-		out.open(fileAddress);
-
-		out << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
-			<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
-			<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
-			<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
-			<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
-			<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
+		fileOutput.push_back(" ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- \n1. Ordered To Released	=> Max: " + to_string(max1) + " , Min: " + to_string(min1)
+			+ "\n2. Released to Active	=> Max: " + to_string(max2) + " , Min: " + to_string(min2 )
+			+ "\n3. Active to Done		=> Max: " + to_string(max3) + " , Min: " + to_string(min3) 
+			+ "\n4. Check Collisions		=> Max: " + to_string(max4) + " , Min: " + to_string(min4)
+			+ "\n5. Update Locations		=> Max: " + to_string(max5) + " , Min: " + to_string(min5));
 		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
 
 		cout << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
@@ -680,7 +652,6 @@ void printResponseTimes() {
 			<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
 		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
 
-		out.close();
 	}
 
 }
@@ -745,8 +716,12 @@ void checkForCollision() {
 	else {		//go through active array and check for collisions
 		for (unsigned int i = 0; i < active.size() - 1; i++) {
 			for (unsigned int j = i + 1; j < active.size(); j++) {
+				bool messageSent = false;
 				while (active[i].collisionCheck(active[j], 1)) { //check if two planes will collide at Time + 1
-					collisionWarning(active[i], active[j]);
+					if (!messageSent) {
+						collisionWarning(active[i], active[j]);
+						messageSent = true;
+					}
 					if (active[i].getCurrentVelocity().getVz() < active[j].getCurrentVelocity().getVz()) {
 						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
 					}
@@ -754,6 +729,7 @@ void checkForCollision() {
 						active[i].redirect(active[j]);
 					}
 				}
+
 			}
 		}
 	}
@@ -971,14 +947,23 @@ void choice(Plane a, char Choice) {
 	}
 }
 
+void pushToFile() {
+	out.open(fileAddress);
+	for (int i = 0; i < fileOutput.size(); i++) {
+		out << fileOutput[i];
+	}
+	out.close();
+}
 
 
 int main() {
 
+	
+
 	int airplane_schedule[160] = {
 		0, -641, 283, 500, 95000, 101589, 10000, 13,
-		1, -223, -630, -526, 71000, 100000, 13000, 16,
-		-1, -180, -446, -186, 41000, 100000, 6000, 31,
+		1, -5000, 0, 0, 71000, 100000, 10100, 16,
+		-1, 5000, 0, 0, 41000, 100000, 10000, 18,
 		3, 474, -239, 428, 38000, 0, 14000, 44,
 		-1, -535, 520, 360, 95000, 100000, 1000, 49,
 		-1, -164, -593, -501, 83000, 100000, 12000, 67,
@@ -1034,6 +1019,7 @@ int main() {
 	beginTime = chrono::steady_clock::now();
 
 	timer_start(printHitList, 5000);
+	timer_start(pushToFile, 5000);
 
 	char option = 'm';
 
