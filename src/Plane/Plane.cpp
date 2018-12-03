@@ -105,6 +105,10 @@ public:
 		return wantedLocation;
 	}
 
+	double getMagnitudeVelocity() const {
+		return magnetudeOfVelocity;
+	}
+
 	int getId() const {
 		return id;
 	}

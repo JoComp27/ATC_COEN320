@@ -45,6 +45,7 @@ void updateLocation();
 bool isNeverEntering(Plane a);
 void checkForCollision();
 void printStatus();
+void menu();
 
 string getExitDirection(Plane a);
 void checkForCollision();
@@ -507,13 +508,13 @@ system("pause");
 
 
 //prints the status of the planes that are Active
-//void printStatus() {
-//
-//	for (int p = 0; p < active.size(); p++) {
-//		active[p].print();
-//		cout << endl;
-//	}
-//}
+void printStatus() {
+
+	for (int p = 0; p < active.size(); p++) {
+		active[p].print();
+		cout << endl;
+	}
+}
 
 //checks if plane never enters the active zone
 bool isNeverEntering(Plane a) {
@@ -599,9 +600,95 @@ void updateLocation() {
 	}
 }
 
-//PARAMETERS OF PROJECT
-// (ID, Vx, Vy, Vz, X, Y, Z, Release time)
-// Height of block : 25000
-// Width and length of block : 100000
 
+void menu() {
+	cout << "************  Menu  ************" << endl;
+	cout << "Do you want to : \na) Change altitude by n*1000 ft\n";
+	cout << "b) Increase or decrease speed by a factor\n";
+	cout << "c) Change direction in horizontal plane\n";
+	cout << "d) Enter or leave a holding pattern\n";
+	cout << "e) Report current position and velocity\n";
+	cout << "f) Add or delete an aircraft\n";
+	cout << "g) Change position of aircraft\n";
+	cout << "h) Display data record for a given aircraft\n";
+	cout << "i) Project aircraft positions in future\n";
+}
 
+voit choice(Plane a, char choice) {
+	switch (choice) {
+	case a:
+		cout << "By how much do you want to change the altitude?\n";
+		int altitude;
+		cin >> altitude;
+		while (a.collisionCheck(a, 1)) { //Check for collisions
+			cout << "Please enter another value that won't create any collision\n";
+			cin >> altitude;
+		}
+		a.setCurrentPosition(a.getCurrentLocation().getX(), a.getCurrentLocation().getY(), a.getCurrentLocation().getZ() + altitude);
+	case b:
+		double speed;
+		cout << "By what factor do you wish to change the speed?";
+		cin << speed;
+		while (a.collisionCheck(a, 1)) { //Check for collisions
+			cout << "Please enter another value that won't create any collision\n";
+			cin >> speed;
+		}
+		a.setCurrentVelocity(a.getCurrentVelocity().getVx()*speed, a.getCurrentVelocity().getVy()*speed, a.getCurrentVelocity().getVz()*speed);
+	case c:
+		int x, y;
+		cout << "Please input the x direction: ";
+		cin >> x;
+		cout << "Please input the y direction: ";
+		cin >> y;
+	
+		double magnitude = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+		a.setCurrentVelocity(x / magnitude * a.getMagnitudeVelocity(), y / magnitude * a.getMagnitudeVelocity(), a.getCurrentVelocity().getVz());
+	case d:
+		a.toggleHoldingPattern();
+	case e:
+		a.print();
+	case f:
+		bool add;
+		cout << "Enter 1. Add Plane or 0. Delete Plane";
+		cin << add;
+		if (add) {
+			//make a plane and insert it into ordered array according to release time
+		}
+		else {
+			int id;
+			cout << "Please enter the id of the plane you wish to delete.\n";
+			cin >> id;
+			for (int p = 0; p < active.size(); p++) {
+				if (active[p].getId() == id) {
+					cout << "Plane " << id << "was deleted sucessfully.\n";
+					active.erase(ordered.begin() + p);	//erase the plane from the active array
+				}
+			}
+			else{
+				cout << "Plane " << id << " is not in the active block."
+			}
+		}
+	case g:
+		int x, y, z;
+		cout << "Please input the x location: ";
+		cin >> x;
+		cout << "Please input the y location: ";
+		cin >> y;
+		cout << "Please input the z location: ";
+		cin >> z;
+		a.setCurrentPosition(x, y, z);
+	case h:
+		a.print(); //NEED TO PRINT RECORD OF PAST LOCATIONS *******
+	case i:
+		int time;
+		cout << "At what time do you want to project the future location of the aircraft?\n";
+		cin >> time;
+		Location future = a.getFutureLocation(time);
+		cout << "Plane " << a.getId() << " will be at location ( " << future.getX() << " , " << future.getY() << " , " << future.getZ() << " )";
+	}
+}
+
+vector<Plane> ordered;	//contains planes ordered by released time
+vector<Plane> released;	//contains planes that are released but not yet in active zone
+vector<Plane> active;	//contains planes that are in active zone
+vector<Plane> done;		//contains planes that left the active zone or planes that will never get into the active zone
