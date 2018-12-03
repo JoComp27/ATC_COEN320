@@ -817,6 +817,16 @@ void choice(Plane a, char Choice) {
 
 	Location future;
 	switch(Choice) {
+	case 'm':
+	{
+		menu();
+		break; 
+	}	
+	case 'x': 
+	{
+		break;
+	}
+	
 	case 'a':
 	{
 		cout << "By how much do you want to change the altitude?\n";
@@ -840,6 +850,7 @@ void choice(Plane a, char Choice) {
 			cin >> speed;
 		}
 		a.setCurrentVelocity(a.getCurrentVelocity().getVx()*speed, a.getCurrentVelocity().getVy()*speed, a.getCurrentVelocity().getVz()*speed);
+		response(a, 2, 1);
 		break;
 	}
 	case 'c':
@@ -853,6 +864,7 @@ void choice(Plane a, char Choice) {
 
 		tempMagnitude = sqrt(pow(x, 2) + pow(y, 2));
 		a.setCurrentVelocity(x / tempMagnitude * a.getMagnitudeVelocity(), y / tempMagnitude * a.getMagnitudeVelocity(), a.getCurrentVelocity().getVz());
+		response(a, 2, 1);
 		break;
 	}
 	case 'd':
@@ -867,7 +879,50 @@ void choice(Plane a, char Choice) {
 		cout << "Enter 1. Add Plane or 0. Delete Plane";
 		cin >> add;
 		if (add) {
-			//make a plane and insert it into ordered array according to release time
+			int positionX, positionY, positionZ;
+			int velocityX, velocityY, velocityZ;
+			int releaseTime;
+			
+			cout << "Please insert the following positions. \n";
+			cout << "Position x: ";
+			cin >> positionX;
+			cout << "Position y: ";
+			cin >> positionY;
+			cout << "Position z: ";
+			cin >> positionZ;
+			cout << endl;
+			cout << "Please enter velocities: \n";
+			cout << "Velocity x: ";
+			cin >> velocityX;
+			cout << "Velocity y: \n";
+			cin >> velocityY;
+			cout << "Velocity z: \n";
+			cin >> velocityZ;
+			cout << endl;
+			Plane plane = Plane(-1, velocityX, velocityY, velocityZ, positionX, positionY, positionZ, releaseTime);
+			if (isNeverEntering(plane)) {
+				done.push_back(plane);
+			}
+			else if (releaseTime < getTime()) {
+				for (unsigned int p = 0; p < ordered.size(); p++) {
+					if (releaseTime < ordered[p].getReleaseTime()) {
+						ordered.insert(p + ordered.begin(), plane);
+						break;
+					}
+					else if (p == ordered.size() - 1) {		//if release time is larger than the last plane release time
+						ordered.push_back(plane);
+						cout << "Plane added successfuly.\n";
+					}
+				}
+			}
+			else if (plane.isInsideTheBlock(plane.getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)){
+				active.push_back(plane);
+				cout << "Plane added successfuly.\n";
+			}
+			else {
+				released.push_back(plane);
+				cout << "Plane added successfuly.\n";
+			}
 		}
 		else {
 			int id;
@@ -880,9 +935,7 @@ void choice(Plane a, char Choice) {
 					break;
 				}
 			}
-
 			cout << "Plane " << id << " is not in the active block.";
-
 		}
 		break;
 	}
