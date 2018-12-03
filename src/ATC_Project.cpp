@@ -19,7 +19,7 @@
 #include <mutex>
 using namespace std;
 
-const string fileAddress = "TrackFile.txt";
+
 
 int time = 0;
 
@@ -48,6 +48,7 @@ bool isNeverEntering(Plane a);
 void checkForCollision();
 void printStatus();
 void menu();
+
 
 string getExitDirection(Plane a);
 void checkForCollision();
@@ -222,6 +223,7 @@ void response(Plane a, int messageType, int n = 1) {
 			<< " z: " << futureLoc.getZ()
 			<< ", over." << endl << endl;
 		break;
+
 	case 4: //Change altitude Response
 		out << " we have received your message and have changed our altitude by " << n << "000 feet, over" << endl << endl;
 		cout << " we have received your message and have changed our altitude by " << n << "000 feet, over" << endl << endl;
@@ -354,11 +356,7 @@ void printResponseTimes() {
 
 }
 
-void emptyBlockTest() {
-	tStart = clock();
-	//Null Program
-	endClock(0);
-}
+
 
 void endClock(int processID) {
 	tEnd = clock();
@@ -385,6 +383,12 @@ void endClock(int processID) {
 		userConsole.push_back(tEnd - tStart - emptyBlock);
 		break;
 	}
+}
+
+void emptyBlockTest() {
+	tStart = clock();
+	//Null Program
+	endClock(0);
 }
 
 int main() {
@@ -562,7 +566,7 @@ void checkForCollision() {
 				}
 				while (active[i].collisionCheck(active[j], 3)) { //check if two planes will collide at Time + 3
 					collisionWarning(active[i], active[j]);
-					if (active[i].getCurrentVelocity().getVz < active[j].getCurrentVelocity().getVz()) {
+					if (active[i].getCurrentVelocity().getVz() < active[j].getCurrentVelocity().getVz()) {
 						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
 					}
 					else {
@@ -706,7 +710,7 @@ void choice(Plane a, char choice) {
 		cout << "At what time do you want to project the future location of the aircraft?\n";
 		cin >> time;
 		future = a.getFutureLocation(time);
-		cout << "Plane " << a.getId() << " will be at location ( " << future.getX() << " , " << future.getY() << " , " << future.getZ() << " )";
+		cout << "Plane " << a.getId() << " will be at location ( " << future.getX() << " , " << future.getY() << " , " << future.getZ() << " )\n";
 		break;
 	default:
 		cout << "Please enter a valid option.\n";
