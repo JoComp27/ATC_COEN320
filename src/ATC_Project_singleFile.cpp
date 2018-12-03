@@ -11,10 +11,13 @@
 #include <pthread.h>
 #include <time.h>
 #include <thread>
+#include <chrono>
+#include <functional>
 #include <fstream>
 #include <string>
 #include <algorithm>
 #include <cmath>
+#include <mutex>
 
 /*
  * Plane.h
@@ -46,11 +49,9 @@ vector<clock_t> userConsole;
 static int ufoId = 0;
 
 void updateLocation();
-
-void checkForCollision();
-void printStatus();
 void checkForCollision();
 
+mutex infoMtxLock;
 
 class Velocity {
 public:
@@ -410,13 +411,16 @@ void receiveBroadcast(Plane a) {
 }
 
 
-void request(Plane a, int messageType, int n = 1) {
+void request(Plane &a, int messageType, int n = 1) {
+
+	while (!infoMtxLock.try_lock()) {
+	}
 
 	ofstream out;
 	out.open(fileAddress);
 
-	out << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << " ---------" << endl;
-	cout << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << time << " ---------" << endl;
+	out << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << t << " ---------" << endl;
+	cout << " -------- SPORADIC ATC TO PLANE REQUEST AT TIME " << t << " ---------" << endl;
 
 	if (a.getUfo()) {
 		out << "UFO " << a.getId();
@@ -443,8 +447,8 @@ void request(Plane a, int messageType, int n = 1) {
 
 	case 3: //Future Position Request
 
-		out << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
-		cout << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
+		out << ",ATC requests your future position at time " << (t + n) << ", over" << endl << endl;
+		cout << ",ATC requests your future position at time " << (t + n) << ", over" << endl << endl;
 
 		break;
 	case 4: //Elevation Change request
@@ -455,14 +459,19 @@ void request(Plane a, int messageType, int n = 1) {
 
 
 	out.close();
+	infoMtxLock.unlock();
 }
 
-void response(Plane a, int messageType, int n = 1) {
+void response(Plane &a, int messageType, int n = 1) {
+
+	while (!infoMtxLock.try_lock()) {
+	}
+
 	ofstream out;
 	out.open(fileAddress);
 
-	out << " -------- SPORADIC PLANE RESPONSE AT TIME " << time << " ---------" << endl;
-	cout << " -------- SPORADIC PLANE RESPONSE AT TIME " << time << " ---------" << endl;
+	out << " -------- SPORADIC PLANE RESPONSE AT TIME " << t << " ---------" << endl;
+	cout << " -------- SPORADIC PLANE RESPONSE AT TIME " << t << " ---------" << endl;
 
 	Location futureLoc = a.getFutureLocation(n);
 
@@ -508,24 +517,26 @@ void response(Plane a, int messageType, int n = 1) {
 		break;
 	case 3: //Future Position Request
 
-		out << ", our future position at time " << (time + n)
+		out << ", our future position at time " << (t + n)
 			<< " is x: " << futureLoc.getX()
 			<< " y: " << futureLoc.getY()
 			<< " z: " << futureLoc.getZ()
 			<< ", over." << endl << endl;
 
-		cout << ", our future position at time " << (time + n)
+		cout << ", our future position at time " << (t + n)
 			<< " is x: " << futureLoc.getX()
 			<< " y: " << futureLoc.getY()
 			<< " z: " << futureLoc.getZ()
 			<< ", over." << endl << endl;
 		break;
 	case 4: //Change altitude Response
+		a.setCurrentPosition(a.getCurrentLocation().getX(), a.getCurrentLocation().getY(), a.getCurrentLocation().getZ() + n * 1000);
 		out << " we have received your message and have changed our altitude by " << n << "000, over" << endl << endl;
 		cout << " we have received your message and have changed our altitude by " << n << "000, over" << endl << endl;
 	}
 
 	out.close();
+	infoMtxLock.unlock();
 }
 
 void collisionWarning(Plane a, Plane b) {
@@ -563,13 +574,17 @@ void collisionWarning(Plane a, Plane b) {
 }
 
 void printHitList() {
+
+	while (!infoMtxLock.try_lock()) {
+	}
+
 	ofstream out;
 	out.open(fileAddress);
 
 	out << " -------- PERIODIC HIT LIST AT TIME " << t << " -------- " << endl;
 	cout << " -------- PERIODIC HIT LIST AT TIME " << t << " -------- " << endl;
 
-	for (int i = 0; i < active.size(); i++) {
+	for (unsigned int i = 0; i < active.size(); i++) {
 		Plane temp = active[i];
 
 		out << "ID: ";
@@ -600,6 +615,7 @@ void printHitList() {
 	cout << endl;
 
 	out.close();
+	infoMtxLock.unlock();
 }
 
 void printResponseTimes() {
@@ -685,6 +701,17 @@ void emptyBlockTest() {
 	endClock(0);
 }
 
+void timer_start(function<void(void)> func, unsigned int interval){
+	thread([func, interval]()
+	{
+		while (true){
+			auto x = chrono::steady_clock::now() + chrono::milliseconds(interval);
+			func();
+			this_thread::sleep_until(x);
+		}
+	}).detach();
+}
+
 int main() {
 
 	int airplane_schedule[160] = {
@@ -714,7 +741,7 @@ int main() {
 
 
 	//Read the List and put planes in the Ordered Vector
-	for (int i = 0; i < sizeof(airplane_schedule) / sizeof(*airplane_schedule); i += 8) {
+	for (unsigned int i = 0; i < sizeof(airplane_schedule) / sizeof(*airplane_schedule); i += 8) {
 
 
 		//create planes and set their values
@@ -731,7 +758,7 @@ int main() {
 		}
 		else {								//else go through ordered vector and put it at its right position
 			int size = ordered.size();
-			for (int p = 0; p < size; p++) {
+			for (unsigned int p = 0; p < size; p++) {
 				if (plane.getReleaseTime() < ordered[p].getReleaseTime()) {
 					ordered.insert(p + ordered.begin(), plane);
 					break;
@@ -743,6 +770,7 @@ int main() {
 		}
 	}	//finished sorting the planes in ordered list
 
+	timer_start(printHitList, 5000);
 
 	//while (done.size() < sizeof(airplane_schedule) / sizeof(*airplane_schedule) / 8) {	//while time is running and planes are not done
 
@@ -761,7 +789,7 @@ int main() {
 	tStart = clock();
 
 	//Check when plane is active and store into Active zone
-	for (int i = 0; i < released.size(); i++) {
+	for (unsigned int i = 0; i < released.size(); i++) {
 		//checks if plane is in the active block
 		if (isNeverEntering(released[i])) {
 			done.push_back(released[i]);
@@ -780,7 +808,7 @@ int main() {
 	tStart = clock();
 
 	//Check when plane is gets out of active zone
-	for (int i = 0; i < active.size(); i++) {
+	for (unsigned int i = 0; i < active.size(); i++) {
 		if (!active[i].isInsideTheBlock(active[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
 			done.push_back(active[i]);			//plane is put into Done array
 			broadcast(active[i]);				//send message to next ATC
@@ -806,8 +834,6 @@ int main() {
 
 	//}
 
-	printHitList();
-
 	printResponseTimes(); // Returns the max and min response time of main processes
 
 	system("pause");
@@ -815,20 +841,11 @@ int main() {
 }
 
 
-//prints the status of the planes that are Active
-//void printStatus() {
-//
-//	for (int p = 0; p < active.size(); p++) {
-//		active[p].print();
-//		cout << endl;
-//	}
-//}
-
 //checks if plane never enters the active zone
 bool isNeverEntering(Plane a) {
-	bool x = (a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0) || a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx() < 0;
-	bool y = a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0 || a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy() < 0;
-	bool z = a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0 || a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz() < 0;
+	bool x = (a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0) || (a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx() < 0);
+	bool y = (a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0) || (a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy() < 0);
+	bool z = (a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0) || (a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz() < 0);
 
 	return x || y || z;
 }
@@ -838,8 +855,8 @@ void checkForCollision() {
 		return;
 	}
 	else {		//go through active array and check for collisions
-		for (int i = 0; i < active.size() - 1; i++) {
-			for (int j = i + 1; j < active.size(); j++) {
+		for (unsigned int i = 0; i < active.size() - 1; i++) {
+			for (unsigned int j = i + 1; j < active.size(); j++) {
 				while (active[i].collisionCheck(active[j], 1)) { //check if two planes will collide at Time + 1
 					collisionWarning(active[i], active[j]);
 					if (active[i].getCurrentVelocity().getVz() < active[j].getCurrentVelocity().getVz()) {
@@ -879,6 +896,9 @@ string getExitDirection(Plane a) {
 }
 
 void updateLocation() {
+	while (!infoMtxLock.try_lock()) {
+	}
+
 	for (auto& plane : released) {
 		plane.updateLocation();
 	}
@@ -888,6 +908,8 @@ void updateLocation() {
 	for (auto& plane : done) {
 		plane.updateLocation();
 	}
+	infoMtxLock.unlock();
+	
 }
 
 //PARAMETERS OF PROJECT
