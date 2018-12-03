@@ -15,6 +15,8 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <atomic>
+#include <mutex>
 using namespace std;
 
 string fileAddress = "TrackFile.txt";
@@ -146,7 +148,12 @@ void request(Plane a, int messageType, int n = 1) {
 		cout << ",ATC requests your future position at time " << (time + n) << ", over" << endl << endl;
 
 		break;
+	case 4: //Elevation Change request
+		out << ",ATC requests an elevation change of " << n << "000 feet, over" << endl << endl;
+		cout << ",ATC requests an elevation change of " << n << "000 feet, over" << endl << endl;
 	}
+	
+
 
 	out.close();
 }
@@ -214,6 +221,9 @@ void response(Plane a, int messageType, int n = 1) {
 			<< " z: " << futureLoc.getZ()
 			<< ", over." << endl << endl;
 		break;
+	case 4: //Change altitude Response
+		out << " we have received your message and have changed our altitude by " << n << "000 feet, over" << endl << endl;
+		cout << " we have received your message and have changed our altitude by " << n << "000 feet, over" << endl << endl;
 	}
 
 	out.close();
