@@ -712,6 +712,77 @@ void timer_start(function<void(void)> func, unsigned int interval){
 	}).detach();
 }
 
+//checks if plane never enters the active zone
+bool isNeverEntering(Plane a) {
+	bool x = (a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0) || (a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx() < 0);
+	bool y = (a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0) || (a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy() < 0);
+	bool z = (a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0) || (a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz() < 0);
+
+	return x || y || z;
+}
+
+void checkForCollision() {
+	if (active.size() < 2) { //No need to check for collisions if less than two planes inside active area
+		return;
+	}
+	else {		//go through active array and check for collisions
+		for (unsigned int i = 0; i < active.size() - 1; i++) {
+			for (unsigned int j = i + 1; j < active.size(); j++) {
+				while (active[i].collisionCheck(active[j], 1)) { //check if two planes will collide at Time + 1
+					collisionWarning(active[i], active[j]);
+					if (active[i].getCurrentVelocity().getVz() < active[j].getCurrentVelocity().getVz()) {
+						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
+					}
+					else {
+						active[i].redirect(active[j]);
+					}
+				}
+			}
+		}
+	}
+}
+
+string getExitDirection(Plane a) {
+	string answer = "";
+	int eastDiff = abs(a.getCurrentLocation().getX() - width);
+	int westDiff = abs(a.getCurrentLocation().getX());
+	int northDiff = abs(a.getCurrentLocation().getY() - depth);
+	int southDiff = abs(a.getCurrentLocation().getX());
+
+	int minimum = min(eastDiff, min(westDiff, min(northDiff, southDiff)));
+
+	if (eastDiff == minimum) {
+		return "East";
+	}
+	else if (westDiff == minimum) {
+		return "West";
+	}
+	else if (northDiff == minimum) {
+		return "North";
+	}
+	else {
+		return "South";
+	}
+
+}
+
+void updateLocation() {
+	while (!infoMtxLock.try_lock()) {
+	}
+
+	for (auto& plane : released) {
+		plane.updateLocation();
+	}
+	for (auto& plane : active) {
+		plane.updateLocation();
+	}
+	for (auto& plane : done) {
+		plane.updateLocation();
+	}
+	infoMtxLock.unlock();
+
+}
+
 int main() {
 
 	int airplane_schedule[160] = {
@@ -838,78 +909,6 @@ int main() {
 
 	system("pause");
 	return 0;
-}
-
-
-//checks if plane never enters the active zone
-bool isNeverEntering(Plane a) {
-	bool x = (a.getCurrentLocation().getX() > width && a.getCurrentVelocity().getVx() > 0) || (a.getCurrentLocation().getX() < 0 && a.getCurrentVelocity().getVx() < 0);
-	bool y = (a.getCurrentLocation().getY() > depth && a.getCurrentVelocity().getVy() > 0) || (a.getCurrentLocation().getY() < 0 && a.getCurrentVelocity().getVy() < 0);
-	bool z = (a.getCurrentLocation().getZ() > height && a.getCurrentVelocity().getVz() > 0) || (a.getCurrentLocation().getZ() < 0 && a.getCurrentVelocity().getVz() < 0);
-
-	return x || y || z;
-}
-
-void checkForCollision() {
-	if (active.size() < 2) { //No need to check for collisions if less than two planes inside active area
-		return;
-	}
-	else {		//go through active array and check for collisions
-		for (unsigned int i = 0; i < active.size() - 1; i++) {
-			for (unsigned int j = i + 1; j < active.size(); j++) {
-				while (active[i].collisionCheck(active[j], 1)) { //check if two planes will collide at Time + 1
-					collisionWarning(active[i], active[j]);
-					if (active[i].getCurrentVelocity().getVz() < active[j].getCurrentVelocity().getVz()) {
-						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
-					}
-					else {
-						active[i].redirect(active[j]);
-					}
-				}
-			}
-		}
-	}
-}
-
-string getExitDirection(Plane a) {
-	string answer = "";
-	int eastDiff = abs(a.getCurrentLocation().getX() - width);
-	int westDiff = abs(a.getCurrentLocation().getX());
-	int northDiff = abs(a.getCurrentLocation().getY() - depth);
-	int southDiff = abs(a.getCurrentLocation().getX());
-
-	int minimum = min(eastDiff, min(westDiff, min(northDiff, southDiff)));
-
-	if (eastDiff == minimum) {
-		return "East";
-	}
-	else if (westDiff == minimum) {
-		return "West";
-	}
-	else if (northDiff == minimum) {
-		return "North";
-	}
-	else {
-		return "South";
-	}
-
-}
-
-void updateLocation() {
-	while (!infoMtxLock.try_lock()) {
-	}
-
-	for (auto& plane : released) {
-		plane.updateLocation();
-	}
-	for (auto& plane : active) {
-		plane.updateLocation();
-	}
-	for (auto& plane : done) {
-		plane.updateLocation();
-	}
-	infoMtxLock.unlock();
-	
 }
 
 //PARAMETERS OF PROJECT
