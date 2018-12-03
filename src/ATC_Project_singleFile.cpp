@@ -811,7 +811,7 @@ void updateLocation() {
 
 Plane getPlanebyID(int id) {
 	for (int i = 0; i < active.size(); i++) {
-		if (active[i].getId == id) {
+		if (active[i].getId() == id) {
 			return active[i];
 		}
 	}
@@ -849,7 +849,7 @@ void choice(char Choice) {
 	
 	case 'a':
 	{
-		cout << "Please enter the Plane id./n";
+		cout << "Please enter the Plane id.\n";
 		cin >> planeid;
 		a = getPlanebyID(planeid);
 		cout << "By how much do you want to change the altitude?\n";
@@ -865,7 +865,7 @@ void choice(char Choice) {
 	}
 	case 'b':
 	{
-		cout << "Please enter the Plane id./n";
+		cout << "Please enter the Plane id.\n";
 		cin >> planeid;
 		a = getPlanebyID(planeid);
 		double speed;
@@ -881,7 +881,7 @@ void choice(char Choice) {
 	}
 	case 'c':
 	{
-		cout << "Please enter the Plane id./n";
+		cout << "Please enter the Plane id.\n";
 		cin >> planeid;
 		a = getPlanebyID(planeid);
 		int x, y;
@@ -897,13 +897,13 @@ void choice(char Choice) {
 		break;
 	}
 	case 'd':
-		cout << "Please enter the Plane id./n";
+		cout << "Please enter the Plane id.\n";
 		cin >> planeid;
 		a = getPlanebyID(planeid);
 		a.toggleHoldingPattern();
 		break;
 	case 'e':
-		cout << "Please enter the Plane id./n";
+		cout << "Please enter the Plane id.\n";
 		cin >> planeid;
 		a = getPlanebyID(planeid);
 		request(a, 1, 1);
@@ -982,7 +982,7 @@ void choice(char Choice) {
 	}
 	case 'g':
 	{
-		cout << "Please enter the Plane id./n";
+		cout << "Please enter the Plane id.\n";
 		cin >> planeid;
 		a = getPlanebyID(planeid);
 		int tempX, tempY, tempZ;
@@ -1002,7 +1002,7 @@ void choice(char Choice) {
 		break;
 	case 'i':
 	{
-		cout << "Please enter the Plane id./n";
+		cout << "Please enter the Plane id.\n";
 		cin >> planeid;
 		a = getPlanebyID(planeid);
 		int time;
@@ -1184,7 +1184,7 @@ int main() {
 	beginTime = chrono::steady_clock::now();
 
 
-	char option = 'm';
+
 	
 		timer_start(OtoR, 1000);
 		
@@ -1202,8 +1202,9 @@ int main() {
 
 	
 		while (option != 'x') {	//while time is running and planes are not done
-			int planeId = -2;
-			cout << "Please enter a plane ID";
+			choice(option);
+			cout << "Please enter an option or m to see the menu.\n";
+			cin >> option;
 			
 		}
 	
