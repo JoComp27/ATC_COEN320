@@ -809,6 +809,15 @@ void updateLocation() {
 
 }
 
+Plane getPlanebyID(int id) {
+	for (int i = 0; i < active.size(); i++) {
+		if (active[i].getId == id) {
+			return active[i];
+		}
+	}
+	cout << "Plane is not into active list./n";
+}
+
 void menu() {
 	cout << "************  Menu  ************" << endl;
 	cout << "Do you want to : \na) Change altitude by n*1000 ft\n";
@@ -822,12 +831,27 @@ void menu() {
 	cout << "i) Project aircraft positions in future\n";
 }
 
-void choice(Plane a, char Choice) {
-
+void choice(char Choice) {
+	int planeid;
 	Location future;
+	Plane a;
 	switch(Choice) {
+	case 'm':
+	{
+		menu();
+		break; 
+	}	
+	case 'x': 
+	{
+		printResponseTimes(); // Returns the max and min response time of main processes
+		break;
+	}
+	
 	case 'a':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		cout << "By how much do you want to change the altitude?\n";
 		int altitude;
 		cin >> altitude;
@@ -841,6 +865,9 @@ void choice(Plane a, char Choice) {
 	}
 	case 'b':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		double speed;
 		cout << "By what factor do you wish to change the speed?";
 		cin >> speed;
@@ -849,10 +876,14 @@ void choice(Plane a, char Choice) {
 			cin >> speed;
 		}
 		a.setCurrentVelocity(a.getCurrentVelocity().getVx()*speed, a.getCurrentVelocity().getVy()*speed, a.getCurrentVelocity().getVz()*speed);
+		response(a, 2, 1);
 		break;
 	}
 	case 'c':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		int x, y;
 		double tempMagnitude;
 		cout << "Please input the x direction: ";
@@ -862,13 +893,23 @@ void choice(Plane a, char Choice) {
 
 		tempMagnitude = sqrt(pow(x, 2) + pow(y, 2));
 		a.setCurrentVelocity(x / tempMagnitude * a.getMagnitudeVelocity(), y / tempMagnitude * a.getMagnitudeVelocity(), a.getCurrentVelocity().getVz());
+		response(a, 2, 1);
 		break;
 	}
 	case 'd':
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		a.toggleHoldingPattern();
 		break;
 	case 'e':
-		a.print();
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
+		request(a, 1, 1);
+		response(a, 1, 1);
+		request(a, 2, 1);
+		response(a, 2, 1);
 		break;
 	case 'f':
 	{
@@ -876,7 +917,53 @@ void choice(Plane a, char Choice) {
 		cout << "Enter 1. Add Plane or 0. Delete Plane";
 		cin >> add;
 		if (add) {
-			//make a plane and insert it into ordered array according to release time
+			int positionX, positionY, positionZ;
+			int velocityX, velocityY, velocityZ;
+			int releaseTime;
+			
+			cout << "Please insert the following positions. \n";
+			cout << "Position x: ";
+			cin >> positionX;
+			cout << "Position y: ";
+			cin >> positionY;
+			cout << "Position z: ";
+			cin >> positionZ;
+			cout << endl;
+			cout << "Please enter velocities: \n";
+			cout << "Velocity x: ";
+			cin >> velocityX;
+			cout << "Velocity y: \n";
+			cin >> velocityY;
+			cout << "Velocity z: \n";
+			cin >> velocityZ;
+			cout << endl;
+			cout << "Enter release time: ";
+			cin >> releaseTime;
+			cout << endl;
+			Plane plane = Plane(-1, velocityX, velocityY, velocityZ, positionX, positionY, positionZ, releaseTime);
+			if (isNeverEntering(plane)) {
+				done.push_back(plane);
+			}
+			else if (releaseTime < getTime()) {
+				for (unsigned int p = 0; p < ordered.size(); p++) {
+					if (releaseTime < ordered[p].getReleaseTime()) {
+						ordered.insert(p + ordered.begin(), plane);
+						break;
+					}
+					else if (p == ordered.size() - 1) {		//if release time is larger than the last plane release time
+						ordered.push_back(plane);
+						cout << "Plane added successfuly.\n";
+					}
+				}
+			}
+			else if (plane.isInsideTheBlock(plane.getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)){
+				active.push_back(plane);
+				cout << "Plane added successfuly.\n";
+			}
+			else {
+				released.push_back(plane);
+				cout << "Plane added successfuly.\n";
+			}
 		}
 		else {
 			int id;
@@ -889,14 +976,15 @@ void choice(Plane a, char Choice) {
 					break;
 				}
 			}
-
 			cout << "Plane " << id << " is not in the active block.";
-
 		}
 		break;
 	}
 	case 'g':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		int tempX, tempY, tempZ;
 		cout << "Please input the x location: ";
 		cin >> tempX;
@@ -905,13 +993,18 @@ void choice(Plane a, char Choice) {
 		cout << "Please input the z location: ";
 		cin >> tempZ;
 		a.setCurrentPosition(tempX, tempY, tempZ);
+		request(a, 1, 1);
+		response(a, 1, 1);
 		break;
 	}
 	case 'h':
-		a.print(); //NEED TO PRINT RECORD OF PAST LOCATIONS *******
+		printHitList();
 		break;
 	case 'i':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		int time;
 		cout << "At what time do you want to project the future location of the aircraft?\n";
 		cin >> time;
@@ -1090,6 +1183,9 @@ int main() {
 
 	beginTime = chrono::steady_clock::now();
 
+
+	char option = 'm';
+	
 		timer_start(OtoR, 1000);
 		
 		timer_start(RtoA, 1000);
@@ -1104,17 +1200,13 @@ int main() {
 
 	char option = 'm';
 
-	while (option != 'x') {	//while time is running and planes are not done
-
-		menu();
-		
-
-
-		
-
-	}
-
-	printResponseTimes(); // Returns the max and min response time of main processes
+	
+		while (option != 'x') {	//while time is running and planes are not done
+			int planeId = -2;
+			cout << "Please enter a plane ID";
+			
+		}
+	
 
 	system("pause");
 	return 0;
