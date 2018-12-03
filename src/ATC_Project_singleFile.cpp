@@ -800,6 +800,15 @@ void updateLocation() {
 
 }
 
+Plane getPlanebyID(int id) {
+	for (int i = 0; i < active.size(); i++) {
+		if (active[i].getId == id) {
+			return active[i];
+		}
+	}
+	cout << "Plane is not into active list./n";
+}
+
 void menu() {
 	cout << "************  Menu  ************" << endl;
 	cout << "Do you want to : \na) Change altitude by n*1000 ft\n";
@@ -813,9 +822,10 @@ void menu() {
 	cout << "i) Project aircraft positions in future\n";
 }
 
-void choice(Plane a, char Choice) {
-
+void choice(char Choice) {
+	int planeid;
 	Location future;
+	Plane a;
 	switch(Choice) {
 	case 'm':
 	{
@@ -824,11 +834,15 @@ void choice(Plane a, char Choice) {
 	}	
 	case 'x': 
 	{
+		printResponseTimes(); // Returns the max and min response time of main processes
 		break;
 	}
 	
 	case 'a':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		cout << "By how much do you want to change the altitude?\n";
 		int altitude;
 		cin >> altitude;
@@ -842,6 +856,9 @@ void choice(Plane a, char Choice) {
 	}
 	case 'b':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		double speed;
 		cout << "By what factor do you wish to change the speed?";
 		cin >> speed;
@@ -855,6 +872,9 @@ void choice(Plane a, char Choice) {
 	}
 	case 'c':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		int x, y;
 		double tempMagnitude;
 		cout << "Please input the x direction: ";
@@ -868,10 +888,19 @@ void choice(Plane a, char Choice) {
 		break;
 	}
 	case 'd':
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		a.toggleHoldingPattern();
 		break;
 	case 'e':
-		a.print();
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
+		request(a, 1, 1);
+		response(a, 1, 1);
+		request(a, 2, 1);
+		response(a, 2, 1);
 		break;
 	case 'f':
 	{
@@ -898,6 +927,9 @@ void choice(Plane a, char Choice) {
 			cin >> velocityY;
 			cout << "Velocity z: \n";
 			cin >> velocityZ;
+			cout << endl;
+			cout << "Enter release time: ";
+			cin >> releaseTime;
 			cout << endl;
 			Plane plane = Plane(-1, velocityX, velocityY, velocityZ, positionX, positionY, positionZ, releaseTime);
 			if (isNeverEntering(plane)) {
@@ -941,6 +973,9 @@ void choice(Plane a, char Choice) {
 	}
 	case 'g':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		int tempX, tempY, tempZ;
 		cout << "Please input the x location: ";
 		cin >> tempX;
@@ -949,13 +984,18 @@ void choice(Plane a, char Choice) {
 		cout << "Please input the z location: ";
 		cin >> tempZ;
 		a.setCurrentPosition(tempX, tempY, tempZ);
+		request(a, 1, 1);
+		response(a, 1, 1);
 		break;
 	}
 	case 'h':
-		a.print(); //NEED TO PRINT RECORD OF PAST LOCATIONS *******
+		printHitList();
 		break;
 	case 'i':
 	{
+		cout << "Please enter the Plane id./n";
+		cin >> planeid;
+		a = getPlanebyID(planeid);
 		int time;
 		cout << "At what time do you want to project the future location of the aircraft?\n";
 		cin >> time;
@@ -1138,7 +1178,7 @@ int main() {
 
 	char option = 'm';
 
-	while (option != 'x') {	//while time is running and planes are not done
+	
 
 		
 		
@@ -1155,9 +1195,13 @@ int main() {
 		timer_start(printHitList, 5000);
 
 
-	}
-
-	printResponseTimes(); // Returns the max and min response time of main processes
+	
+		while (option != 'x') {	//while time is running and planes are not done
+			int planeId = -2;
+			cout << "Please enter a plane ID";
+			
+		}
+	
 
 	system("pause");
 	return 0;
