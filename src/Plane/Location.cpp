@@ -17,6 +17,7 @@ using namespace std;
 #define PLANE_LOCATION_H_
 
 class Location {
+private:
 
 	int x;
 	int y;

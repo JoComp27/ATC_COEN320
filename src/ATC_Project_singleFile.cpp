@@ -341,6 +341,8 @@ public:
 
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 vector<Plane> ordered;	//contains planes ordered by released time
 vector<Plane> released;	//contains planes that are released but not yet in active zone
 vector<Plane> active;	//contains planes that are in active zone
@@ -816,13 +818,13 @@ int main() {
 
 
 //prints the status of the planes that are Active
-//void printStatus() {
-//
-//	for (int p = 0; p < active.size(); p++) {
-//		active[p].print();
-//		cout << endl;
-//	}
-//}
+void printStatus() {
+
+	for (int p = 0; p < active.size(); p++) {
+		active[p].print();
+		cout << endl;
+	}
+}
 
 //checks if plane never enters the active zone
 bool isNeverEntering(Plane a) {
@@ -889,10 +891,5 @@ void updateLocation() {
 		plane.updateLocation();
 	}
 }
-
-//PARAMETERS OF PROJECT
-// (ID, Vx, Vy, Vz, X, Y, Z, Release time)
-// Height of block : 25000
-// Width and length of block : 100000
 
 

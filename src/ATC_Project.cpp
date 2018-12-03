@@ -9,7 +9,7 @@
 #include "./Plane/Plane.cpp"
 #include <vector>
 #include <iostream>
-#include <pthread.h>
+//#include <pthread.h>
 #include <time.h>
 #include <thread>
 #include <fstream>
@@ -19,7 +19,7 @@
 #include <mutex>
 using namespace std;
 
-string fileAddress = "TrackFile.txt";
+const string fileAddress = "TrackFile.txt";
 
 int time = 0;
 
@@ -75,7 +75,7 @@ void broadcast(Plane a) {
 	out << "has exited our airspace towards the " << outDirection << " Sector, over." << endl << endl;
 	cout << "has exited our airspace towards the " << outDirection << " Sector, over." << endl << endl;
 
-	out.close();
+	out.close(fileAddress);
 }
 
 void receiveBroadcast(Plane a) {
@@ -156,7 +156,7 @@ void request(Plane a, int messageType, int n = 1) {
 	
 
 
-	out.close();
+	out.close(fileAddress);
 }
 
 void response(Plane a, int messageType, int n = 1) {
@@ -227,7 +227,7 @@ void response(Plane a, int messageType, int n = 1) {
 		cout << " we have received your message and have changed our altitude by " << n << "000 feet, over" << endl << endl;
 	}
 
-	out.close();
+	out.close(fileAddress);
 }
 
 void collisionWarning(Plane a, Plane b) {
@@ -260,7 +260,7 @@ void collisionWarning(Plane a, Plane b) {
 	cout << "Making Appropriate Flight Path Changes to Avoid Collision" << endl << endl;
 
 
-	out.close();
+	out.close(fileAddress);
 
 }
 
@@ -301,7 +301,7 @@ void printHitList() {
 	out << endl;
 	cout << endl;
 
-	out.close();
+	out.close(fileAddress);
 }
 
 void printResponseTimes() {
@@ -350,7 +350,7 @@ void printResponseTimes() {
 		<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl
 		<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
 
-	out.close();
+	out.close(fileAddress);
 
 }
 
@@ -446,7 +446,7 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 }	//finished sorting the planes in ordered list
 
 
-//while (done.size() < sizeof(airplane_schedule) / sizeof(*airplane_schedule) / 8) {	//while time is running and planes are not done
+
 
 	tStart = clock();
 
@@ -506,7 +506,7 @@ for(int i = 0; i < sizeof(airplane_schedule)/sizeof(*airplane_schedule); i+=8){
 
 	endClock(5);
 	
-//}
+
 
 printHitList();
 
@@ -553,7 +553,7 @@ void checkForCollision() {
 				}
 				while (active[i].collisionCheck(active[j], 2)) { //check if two planes will collide at Time + 2
 					collisionWarning(active[i], active[j]);
-					if (active[i].getCurrentVelocity().getVz < active[j].getCurrentVelocity().getVz()) {
+					if (active[i].getCurrentVelocity().getVz() < active[j].getCurrentVelocity().getVz()) {
 						active[j].redirect(active[i]);	//redirects the planes according to their respective velocity
 					}
 					else {
@@ -624,9 +624,9 @@ void menu() {
 	cout << "i) Project aircraft positions in future\n";
 }
 
-voit choice(Plane a, char choice) {
+void choice(Plane a, char choice) {
 	switch (choice) {
-	case a:
+	case 'a':
 		cout << "By how much do you want to change the altitude?\n";
 		int altitude;
 		cin >> altitude;
@@ -635,32 +635,39 @@ voit choice(Plane a, char choice) {
 			cin >> altitude;
 		}
 		a.setCurrentPosition(a.getCurrentLocation().getX(), a.getCurrentLocation().getY(), a.getCurrentLocation().getZ() + altitude);
-	case b:
+		break;
+	case 'b':
 		double speed;
 		cout << "By what factor do you wish to change the speed?";
-		cin << speed;
+		cin >> speed;
 		while (a.collisionCheck(a, 1)) { //Check for collisions
 			cout << "Please enter another value that won't create any collision\n";
 			cin >> speed;
 		}
 		a.setCurrentVelocity(a.getCurrentVelocity().getVx()*speed, a.getCurrentVelocity().getVy()*speed, a.getCurrentVelocity().getVz()*speed);
-	case c:
+		break;
+
+	case 'c':
 		int x, y;
+		double tempMagnitude;
 		cout << "Please input the x direction: ";
 		cin >> x;
 		cout << "Please input the y direction: ";
 		cin >> y;
 	
-		double magnitude = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-		a.setCurrentVelocity(x / magnitude * a.getMagnitudeVelocity(), y / magnitude * a.getMagnitudeVelocity(), a.getCurrentVelocity().getVz());
-	case d:
+		tempMagnitude = sqrt(pow(x, 2) + pow(y, 2));
+		a.setCurrentVelocity(x / tempMagnitude * a.getMagnitudeVelocity(), y / tempMagnitude * a.getMagnitudeVelocity(), a.getCurrentVelocity().getVz());
+		break;
+	case 'd':
 		a.toggleHoldingPattern();
-	case e:
+		break;
+	case 'e':
 		a.print();
-	case f:
+		break;
+	case 'f':
 		bool add;
 		cout << "Enter 1. Add Plane or 0. Delete Plane";
-		cin << add;
+		cin >> add;
 		if (add) {
 			//make a plane and insert it into ordered array according to release time
 		}
@@ -672,33 +679,38 @@ voit choice(Plane a, char choice) {
 				if (active[p].getId() == id) {
 					cout << "Plane " << id << "was deleted sucessfully.\n";
 					active.erase(ordered.begin() + p);	//erase the plane from the active array
+					break;
 				}
 			}
-			else{
-				cout << "Plane " << id << " is not in the active block."
-			}
+			
+			cout << "Plane " << id << " is not in the active block.";
+			
 		}
-	case g:
-		int x, y, z;
+		break;
+	case 'g':
+		int tempX, tempY, tempZ;
 		cout << "Please input the x location: ";
-		cin >> x;
+		cin >> tempX;
 		cout << "Please input the y location: ";
-		cin >> y;
+		cin >> tempY;
 		cout << "Please input the z location: ";
-		cin >> z;
-		a.setCurrentPosition(x, y, z);
-	case h:
+		cin >> tempZ;
+		a.setCurrentPosition(tempX, tempY, tempZ);
+		break;
+	case 'h':
 		a.print(); //NEED TO PRINT RECORD OF PAST LOCATIONS *******
-	case i:
+		break;
+	case 'i':
 		int time;
+		Location future;
 		cout << "At what time do you want to project the future location of the aircraft?\n";
 		cin >> time;
-		Location future = a.getFutureLocation(time);
+		future = a.getFutureLocation(time);
 		cout << "Plane " << a.getId() << " will be at location ( " << future.getX() << " , " << future.getY() << " , " << future.getZ() << " )";
+		break;
+	default:
+		cout << "Please enter a valid option.\n";
+		break;
 	}
 }
 
-vector<Plane> ordered;	//contains planes ordered by released time
-vector<Plane> released;	//contains planes that are released but not yet in active zone
-vector<Plane> active;	//contains planes that are in active zone
-vector<Plane> done;		//contains planes that left the active zone or planes that will never get into the active zone
