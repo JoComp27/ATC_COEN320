@@ -916,7 +916,110 @@ void choice(Plane a, char Choice) {
 	}
 }
 
+void OtoR(){
 
+	while (!infoMtxLock.try_lock()) {
+
+	}
+
+	tStart = clock();
+
+//Check when first plane is released and store into Release array
+	if (ordered.size() != 0) {
+		if (ordered[0].getReleaseTime() >= t) {
+			released.push_back(ordered[0]);	//put the plane into release array
+			ordered.erase(ordered.begin());	//erase the plane from the ordered array
+		}
+	}
+
+	endClock(1);
+
+	infoMtxLock.unlock();
+
+}
+
+void RtoA() {
+
+	while (!infoMtxLock.try_lock()) {
+
+		tStart = clock();
+
+		//Check when plane is active and store into Active zone
+		for (unsigned int i = 0; i < released.size(); i++) {
+			//checks if plane is in the active block
+			if (isNeverEntering(released[i])) {
+				done.push_back(released[i]);
+				released.erase(released.begin() + i);	//erase plane from Released array
+			}
+			else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
+				active.push_back(released[i]);			//put plane into Active array
+				receiveBroadcast(released[i]);			//Receive Message from other ATC about new plane
+				released.erase(ordered.begin() + i);	//erase plane from Released array
+
+			}
+		}
+
+		endClock(2);
+
+	}
+
+	infoMtxLock.unlock();
+}
+
+void AtoD() {
+
+	while (!infoMtxLock.try_lock()) {
+
+	}
+
+	tStart = clock();
+
+	//Check when plane is gets out of active zone
+	for (unsigned int i = 0; i < active.size(); i++) {
+		if (!active[i].isInsideTheBlock(active[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
+			done.push_back(active[i]);			//plane is put into Done array
+			broadcast(active[i]);				//send message to next ATC
+			active.erase(active.begin() + i);	//erase plane from Active zone
+		}
+	}
+
+	endClock(3);
+
+	infoMtxLock.unlock();
+
+}
+
+void collisions() {
+
+	while (!infoMtxLock.try_lock()) {
+
+	}
+
+	tStart = clock();
+
+	//Check for collisions in active list
+	checkForCollision();
+
+	endClock(4);
+
+	infoMtxLock.unlock();
+}
+
+void upLoc() {
+
+	while (!infoMtxLock.try_lock()) {
+
+	}
+	tStart = clock();
+
+	//update the location of all planes
+	updateLocation();
+
+	endClock(5);
+
+	infoMtxLock.unlock();
+
+}
 
 int main() {
 
@@ -978,69 +1081,26 @@ int main() {
 
 	beginTime = chrono::steady_clock::now();
 
-	timer_start(printHitList, 5000);
+	
 
 	char option = 'm';
 
 	while (option != 'x') {	//while time is running and planes are not done
 
-	tStart = clock();
-	
-	//Check when first plane is released and store into Release array
-	if (ordered.size() != 0) {
-		if (ordered[0].getReleaseTime() >= t) {
-			released.push_back(ordered[0]);	//put the plane into release array
-			ordered.erase(ordered.begin());	//erase the plane from the ordered array
-		}
-	}
+		
+		
+		timer_start(OtoR, 1000);
+		
+		timer_start(RtoA, 1000);
+		
+		timer_start(AtoD, 1000);
 
-	endClock(1);
+		timer_start(collisions, 1000);
 
-	tStart = clock();
+		timer_start(upLoc, 1000);
 
-	//Check when plane is active and store into Active zone
-	for (unsigned int i = 0; i < released.size(); i++) {
-		//checks if plane is in the active block
-		if (isNeverEntering(released[i])) {
-			done.push_back(released[i]);
-			released.erase(released.begin() + i);	//erase plane from Released array
-		}
-		else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
-			active.push_back(released[i]);			//put plane into Active array
-			receiveBroadcast(released[i]);			//Receive Message from other ATC about new plane
-			released.erase(ordered.begin() + i);	//erase plane from Released array
+		timer_start(printHitList, 5000);
 
-		}
-	}
-
-	endClock(2);
-
-	tStart = clock();
-
-	//Check when plane is gets out of active zone
-	for (unsigned int i = 0; i < active.size(); i++) {
-		if (!active[i].isInsideTheBlock(active[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
-			done.push_back(active[i]);			//plane is put into Done array
-			broadcast(active[i]);				//send message to next ATC
-			active.erase(active.begin() + i);	//erase plane from Active zone
-		}
-	}
-
-	endClock(3);
-
-	tStart = clock();
-
-	//Check for collisions in active list
-	checkForCollision();
-
-	endClock(4);
-
-	tStart = clock();
-
-	//update the location of all planes
-	updateLocation();
-
-	endClock(5);
 
 	}
 
