@@ -634,51 +634,60 @@ void printHitList() {
 }
 
 void printResponseTimes() {
-	if (orderedToReleased.size() != 0 || releasedToActive.size() != 0 || activeToDone.size() != 0 || checkCollisions.size() != 0 || updateLocations.size() != 0) {
-
-	sort(orderedToReleased.begin(), orderedToReleased.end());
-	sort(releasedToActive.begin(), releasedToActive.end());
-	sort(activeToDone.begin(), activeToDone.end());
-	sort(checkCollisions.begin(), checkCollisions.end());
-	sort(updateLocations.begin(), updateLocations.end());
-	//sort(userConsole.begin(), userConsole.begin());
-
-	clock_t max1 = orderedToReleased.back();
-	clock_t min1 = orderedToReleased.front();
-
-	clock_t max2 = releasedToActive.back();
-	clock_t min2 = releasedToActive.front();
-
-	clock_t max3 = activeToDone.back();
-	clock_t min3 = activeToDone.front();
-
-	clock_t max4 = checkCollisions.back();
-	clock_t min4 = checkCollisions.front();
-
-	clock_t max5 = updateLocations.back();
-	clock_t min5 = updateLocations.front();
-
-	//clock_t max6 = userConsole.back();
-	//clock_t min6 = userConsole.front();
-
+	
 	ofstream out;
 	out.open(fileAddress);
 
-	out << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
-		<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
-		<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
-		<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
-		<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
-		<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
-		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+	out << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl;
+	cout << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl;
 
-		cout << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
-		<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
-		<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
-		<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
-		<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
-		<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
-		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+	if (orderedToReleased.size() != 0) {
+		sort(orderedToReleased.begin(), orderedToReleased.end());
+		clock_t max1 = orderedToReleased.back();
+		clock_t min1 = orderedToReleased.front();
+		out << "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl;
+		cout << "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl;
+	}
+
+	if (releasedToActive.size() != 0) {
+		sort(releasedToActive.begin(), releasedToActive.end());
+		clock_t max2 = releasedToActive.back();
+		clock_t min2 = releasedToActive.front();
+		out << "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl;
+		cout << "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl;
+	}
+
+	if (activeToDone.size() != 0) {
+		sort(activeToDone.begin(), activeToDone.end());
+		clock_t max3 = activeToDone.back();
+		clock_t min3 = activeToDone.front();
+		out << "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl;
+		cout << "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl;
+	}
+
+	if (checkCollisions.size() != 0) {
+		sort(checkCollisions.begin(), checkCollisions.end());
+		clock_t max4 = checkCollisions.back();
+		clock_t min4 = checkCollisions.front();
+		out << "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl;
+		cout << "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl;
+	}
+
+	if (updateLocations.size() != 0) {
+		sort(updateLocations.begin(), updateLocations.end());
+		clock_t max5 = updateLocations.back();
+		clock_t min5 = updateLocations.front();
+		out << "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
+		cout << "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
+	}
+
+	if (userConsole.size() != 0) {
+		sort(userConsole.begin(), userConsole.begin());
+		clock_t max6 = userConsole.back();
+		clock_t min6 = userConsole.front();
+		out << "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+		cout << "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+	}
 
 	out.close();
 }
@@ -1081,14 +1090,6 @@ int main() {
 
 	beginTime = chrono::steady_clock::now();
 
-	
-
-	char option = 'm';
-
-	while (option != 'x') {	//while time is running and planes are not done
-
-		
-		
 		timer_start(OtoR, 1000);
 		
 		timer_start(RtoA, 1000);
@@ -1101,6 +1102,15 @@ int main() {
 
 		timer_start(printHitList, 5000);
 
+	char option = 'm';
+
+	while (option != 'x') {	//while time is running and planes are not done
+
+		menu();
+		
+
+
+		
 
 	}
 
