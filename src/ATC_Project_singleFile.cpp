@@ -410,12 +410,12 @@ void receiveBroadcast(Plane a) {
 
 	string outDirection = getExitDirection(a);
 
-	out << "has exited our airspace towards your airspace at the position"
+	out << "has entered your airspace at the position"
 		<< " x: " << a.getCurrentLocation().getX()
 		<< " y: " << a.getCurrentLocation().getY()
 		<< " z: " << a.getCurrentLocation().getZ()
 		<< ", over." << endl << endl;
-	cout << "has exited the airspace towards your airspace at the position"
+	cout << "has entered the airspace towards your airspace at the position"
 		<< " x: " << a.getCurrentLocation().getX()
 		<< " y: " << a.getCurrentLocation().getY()
 		<< " z: " << a.getCurrentLocation().getZ()
@@ -634,65 +634,56 @@ void printHitList() {
 }
 
 void printResponseTimes() {
-	
-	ofstream out;
-	out.open(fileAddress);
+	if (orderedToReleased.size() != 0 || releasedToActive.size() != 0 || activeToDone.size() != 0 || checkCollisions.size() != 0 || updateLocations.size() != 0) {
 
-	out << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl;
-	cout << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl;
-
-	if (orderedToReleased.size() != 0) {
 		sort(orderedToReleased.begin(), orderedToReleased.end());
+		sort(releasedToActive.begin(), releasedToActive.end());
+		sort(activeToDone.begin(), activeToDone.end());
+		sort(checkCollisions.begin(), checkCollisions.end());
+		sort(updateLocations.begin(), updateLocations.end());
+		//sort(userConsole.begin(), userConsole.begin());
+
 		clock_t max1 = orderedToReleased.back();
 		clock_t min1 = orderedToReleased.front();
-		out << "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl;
-		cout << "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl;
-	}
 
-	if (releasedToActive.size() != 0) {
-		sort(releasedToActive.begin(), releasedToActive.end());
 		clock_t max2 = releasedToActive.back();
 		clock_t min2 = releasedToActive.front();
-		out << "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl;
-		cout << "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl;
-	}
 
-	if (activeToDone.size() != 0) {
-		sort(activeToDone.begin(), activeToDone.end());
 		clock_t max3 = activeToDone.back();
 		clock_t min3 = activeToDone.front();
-		out << "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl;
-		cout << "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl;
-	}
 
-	if (checkCollisions.size() != 0) {
-		sort(checkCollisions.begin(), checkCollisions.end());
 		clock_t max4 = checkCollisions.back();
 		clock_t min4 = checkCollisions.front();
-		out << "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl;
-		cout << "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl;
-	}
 
-	if (updateLocations.size() != 0) {
-		sort(updateLocations.begin(), updateLocations.end());
 		clock_t max5 = updateLocations.back();
 		clock_t min5 = updateLocations.front();
-		out << "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
-		cout << "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
+
+		//clock_t max6 = userConsole.back();
+		//clock_t min6 = userConsole.front();
+
+		ofstream out;
+		out.open(fileAddress);
+
+		out << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
+			<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
+			<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
+			<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
+			<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
+			<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
+		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+
+		cout << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
+			<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
+			<< "2. Released to Active	=> Max: " << max2 << " , Min: " << min2 << endl
+			<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
+			<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
+			<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
+		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
+
+		out.close();
 	}
 
-	if (userConsole.size() != 0) {
-		sort(userConsole.begin(), userConsole.begin());
-		clock_t max6 = userConsole.back();
-		clock_t min6 = userConsole.front();
-		out << "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
-		cout << "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
-	}
-
-	out.close();
 }
-
-
 
 void endClock(int processID) {
 	tEnd = clock();
@@ -727,10 +718,10 @@ void emptyBlockTest() {
 	endClock(0);
 }
 
-void timer_start(function<void(void)> func, unsigned int interval){
+void timer_start(function<void(void)> func, unsigned int interval) {
 	thread([func, interval]()
 	{
-		while (true){
+		while (true) {
 			auto x = chrono::steady_clock::now() + chrono::milliseconds(interval);
 			func();
 			this_thread::sleep_until(x);
@@ -809,15 +800,6 @@ void updateLocation() {
 
 }
 
-Plane getPlanebyID(int id) {
-	for (int i = 0; i < active.size(); i++) {
-		if (active[i].getId() == id) {
-			return active[i];
-		}
-	}
-	cout << "Plane is not into active list./n";
-}
-
 void menu() {
 	cout << "************  Menu  ************" << endl;
 	cout << "Do you want to : \na) Change altitude by n*1000 ft\n";
@@ -831,27 +813,22 @@ void menu() {
 	cout << "i) Project aircraft positions in future\n";
 }
 
-void choice(char Choice) {
-	int planeid;
+void choice(Plane a, char Choice) {
+
 	Location future;
-	Plane a;
-	switch(Choice) {
+	switch (Choice) {
 	case 'm':
 	{
 		menu();
-		break; 
-	}	
-	case 'x': 
-	{
-		printResponseTimes(); // Returns the max and min response time of main processes
 		break;
 	}
-	
+	case 'x':
+	{
+		break;
+	}
+
 	case 'a':
 	{
-		cout << "Please enter the Plane id.\n";
-		cin >> planeid;
-		a = getPlanebyID(planeid);
 		cout << "By how much do you want to change the altitude?\n";
 		int altitude;
 		cin >> altitude;
@@ -865,9 +842,6 @@ void choice(char Choice) {
 	}
 	case 'b':
 	{
-		cout << "Please enter the Plane id.\n";
-		cin >> planeid;
-		a = getPlanebyID(planeid);
 		double speed;
 		cout << "By what factor do you wish to change the speed?";
 		cin >> speed;
@@ -881,9 +855,6 @@ void choice(char Choice) {
 	}
 	case 'c':
 	{
-		cout << "Please enter the Plane id.\n";
-		cin >> planeid;
-		a = getPlanebyID(planeid);
 		int x, y;
 		double tempMagnitude;
 		cout << "Please input the x direction: ";
@@ -897,19 +868,10 @@ void choice(char Choice) {
 		break;
 	}
 	case 'd':
-		cout << "Please enter the Plane id.\n";
-		cin >> planeid;
-		a = getPlanebyID(planeid);
 		a.toggleHoldingPattern();
 		break;
 	case 'e':
-		cout << "Please enter the Plane id.\n";
-		cin >> planeid;
-		a = getPlanebyID(planeid);
-		request(a, 1, 1);
-		response(a, 1, 1);
-		request(a, 2, 1);
-		response(a, 2, 1);
+		a.print();
 		break;
 	case 'f':
 	{
@@ -920,7 +882,7 @@ void choice(char Choice) {
 			int positionX, positionY, positionZ;
 			int velocityX, velocityY, velocityZ;
 			int releaseTime;
-			
+
 			cout << "Please insert the following positions. \n";
 			cout << "Position x: ";
 			cin >> positionX;
@@ -937,9 +899,8 @@ void choice(char Choice) {
 			cout << "Velocity z: \n";
 			cin >> velocityZ;
 			cout << endl;
-			cout << "Enter release time: ";
+			cout << "input release time: \n";
 			cin >> releaseTime;
-			cout << endl;
 			Plane plane = Plane(-1, velocityX, velocityY, velocityZ, positionX, positionY, positionZ, releaseTime);
 			if (isNeverEntering(plane)) {
 				done.push_back(plane);
@@ -956,7 +917,7 @@ void choice(char Choice) {
 					}
 				}
 			}
-			else if (plane.isInsideTheBlock(plane.getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)){
+			else if (plane.isInsideTheBlock(plane.getCurrentLocation(), 100000, 100000, 25000, 0, 0, 0)) {
 				active.push_back(plane);
 				cout << "Plane added successfuly.\n";
 			}
@@ -982,9 +943,6 @@ void choice(char Choice) {
 	}
 	case 'g':
 	{
-		cout << "Please enter the Plane id.\n";
-		cin >> planeid;
-		a = getPlanebyID(planeid);
 		int tempX, tempY, tempZ;
 		cout << "Please input the x location: ";
 		cin >> tempX;
@@ -993,18 +951,13 @@ void choice(char Choice) {
 		cout << "Please input the z location: ";
 		cin >> tempZ;
 		a.setCurrentPosition(tempX, tempY, tempZ);
-		request(a, 1, 1);
-		response(a, 1, 1);
 		break;
 	}
 	case 'h':
-		printHitList();
+		a.print(); //NEED TO PRINT RECORD OF PAST LOCATIONS *******
 		break;
 	case 'i':
 	{
-		cout << "Please enter the Plane id.\n";
-		cin >> planeid;
-		a = getPlanebyID(planeid);
 		int time;
 		cout << "At what time do you want to project the future location of the aircraft?\n";
 		cin >> time;
@@ -1018,110 +971,7 @@ void choice(char Choice) {
 	}
 }
 
-void OtoR(){
 
-	while (!infoMtxLock.try_lock()) {
-
-	}
-
-	tStart = clock();
-
-//Check when first plane is released and store into Release array
-	if (ordered.size() != 0) {
-		if (ordered[0].getReleaseTime() >= t) {
-			released.push_back(ordered[0]);	//put the plane into release array
-			ordered.erase(ordered.begin());	//erase the plane from the ordered array
-		}
-	}
-
-	endClock(1);
-
-	infoMtxLock.unlock();
-
-}
-
-void RtoA() {
-
-	while (!infoMtxLock.try_lock()) {
-
-		tStart = clock();
-
-		//Check when plane is active and store into Active zone
-		for (unsigned int i = 0; i < released.size(); i++) {
-			//checks if plane is in the active block
-			if (isNeverEntering(released[i])) {
-				done.push_back(released[i]);
-				released.erase(released.begin() + i);	//erase plane from Released array
-			}
-			else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
-				active.push_back(released[i]);			//put plane into Active array
-				receiveBroadcast(released[i]);			//Receive Message from other ATC about new plane
-				released.erase(ordered.begin() + i);	//erase plane from Released array
-
-			}
-		}
-
-		endClock(2);
-
-	}
-
-	infoMtxLock.unlock();
-}
-
-void AtoD() {
-
-	while (!infoMtxLock.try_lock()) {
-
-	}
-
-	tStart = clock();
-
-	//Check when plane is gets out of active zone
-	for (unsigned int i = 0; i < active.size(); i++) {
-		if (!active[i].isInsideTheBlock(active[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
-			done.push_back(active[i]);			//plane is put into Done array
-			broadcast(active[i]);				//send message to next ATC
-			active.erase(active.begin() + i);	//erase plane from Active zone
-		}
-	}
-
-	endClock(3);
-
-	infoMtxLock.unlock();
-
-}
-
-void collisions() {
-
-	while (!infoMtxLock.try_lock()) {
-
-	}
-
-	tStart = clock();
-
-	//Check for collisions in active list
-	checkForCollision();
-
-	endClock(4);
-
-	infoMtxLock.unlock();
-}
-
-void upLoc() {
-
-	while (!infoMtxLock.try_lock()) {
-
-	}
-	tStart = clock();
-
-	//update the location of all planes
-	updateLocation();
-
-	endClock(5);
-
-	infoMtxLock.unlock();
-
-}
 
 int main() {
 
@@ -1183,31 +1033,79 @@ int main() {
 
 	beginTime = chrono::steady_clock::now();
 
-
-
-	
-		timer_start(OtoR, 1000);
-		
-		timer_start(RtoA, 1000);
-		
-		timer_start(AtoD, 1000);
-
-		timer_start(collisions, 1000);
-
-		timer_start(upLoc, 1000);
-
-		timer_start(printHitList, 5000);
+	timer_start(printHitList, 5000);
 
 	char option = 'm';
 
-	
-		while (option != 'x') {	//while time is running and planes are not done
-			choice(option);
-			cout << "Please enter an option or m to see the menu.\n";
-			cin >> option;
-			
+	while (option != 'x') {	//while time is running and planes are not done
+
+		tStart = clock();
+
+		//Check when first plane is released and store into Release array
+		if (ordered.size() != 0) {
+			if (ordered[0].getReleaseTime() <= (getTime())) {
+				//cout <<  "\n" << getTime() << "This is current time \n";
+				released.push_back(ordered[0]);	//put the plane into release array
+				ordered.erase(ordered.begin());	//erase the plane from the ordered array
+			}
 		}
-	
+
+		endClock(1);
+
+		tStart = clock();
+
+		//Check when plane is active and store into Active zone
+		for (unsigned int i = 0; i < released.size(); i++) {
+			//checks if plane is in the active block
+			if (isNeverEntering(released[i])) {
+				done.push_back(released[i]);
+				released.erase(released.begin() + i);	//erase plane from Released array
+			}
+			else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
+				active.push_back(released[i]);			//put plane into Active array
+				receiveBroadcast(released[i]);			//Receive Message from other ATC about new plane
+				
+					released.erase(released.begin() + i);	//erase plane from Released array
+				
+
+			}
+		}
+
+		endClock(2);
+
+		tStart = clock();
+
+		//Check when plane is gets out of active zone
+		for (unsigned int i = 0; i < active.size(); i++) {
+			if (!active[i].isInsideTheBlock(active[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
+				done.push_back(active[i]);			//plane is put into Done array
+				broadcast(active[i]);				//send message to next ATC
+				active.erase(active.begin() + i);	//erase plane from Active zone
+			}
+		}
+
+		endClock(3);
+
+		tStart = clock();
+
+		//Check for collisions in active list
+		checkForCollision();
+
+		endClock(4);
+
+		tStart = clock();
+
+		//update the location of all planes
+		updateLocation();
+
+		endClock(5);
+
+		auto x = chrono::steady_clock::now() + chrono::milliseconds(1000);
+		this_thread::sleep_until(x);
+
+	}
+
+	//printResponseTimes(); // Returns the max and min response time of main processes
 
 	system("pause");
 	return 0;
@@ -1217,4 +1115,3 @@ int main() {
 // (ID, Vx, Vy, Vz, X, Y, Z, Release time)
 // Height of block : 25000
 // Width and length of block : 100000
-
