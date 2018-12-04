@@ -15,6 +15,7 @@
 #include <functional>
 #include <fstream>
 #include <string>
+#include <string.h>
 #include <algorithm>
 #include <cmath>
 #include <mutex>
@@ -393,7 +394,7 @@ void broadcast(Plane a) {
 
 void receiveBroadcast(Plane a) {
 	double diffTime = getTime();
-	
+
 
 	fileOutput.push_back(" -------- SPORADIC ATC BROADCAST RECEPTION AT TIME " + to_string(diffTime) + " ---------\n A Plane ");
 	cout << " -------- SPORADIC ATC BROADCAST RECEPTION AT TIME " << diffTime << " ---------" << endl << "A Plane ";
@@ -456,7 +457,7 @@ void request(Plane &a, int messageType, int n = 1) {
 
 	case 3: //Future Position Request
 
-		fileOutput.push_back(",ATC requests your future position at time " + to_string(diffTime + n) + ", over") ;
+		fileOutput.push_back(",ATC requests your future position at time " + to_string(diffTime + n) + ", over");
 		cout << ",ATC requests your future position at time " << (diffTime + n) << ", over" << endl << endl;
 
 		break;
@@ -638,8 +639,8 @@ void printResponseTimes() {
 		//clock_t min6 = userConsole.front();
 
 		fileOutput.push_back(" ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- \n1. Ordered To Released	=> Max: " + to_string(max1) + " , Min: " + to_string(min1)
-			+ "\n2. Released to Active	=> Max: " + to_string(max2) + " , Min: " + to_string(min2 )
-			+ "\n3. Active to Done		=> Max: " + to_string(max3) + " , Min: " + to_string(min3) 
+			+ "\n2. Released to Active	=> Max: " + to_string(max2) + " , Min: " + to_string(min2)
+			+ "\n3. Active to Done		=> Max: " + to_string(max3) + " , Min: " + to_string(min3)
 			+ "\n4. Check Collisions		=> Max: " + to_string(max4) + " , Min: " + to_string(min4)
 			+ "\n5. Update Locations		=> Max: " + to_string(max5) + " , Min: " + to_string(min5));
 		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
@@ -955,10 +956,65 @@ void pushToFile() {
 	out.close();
 }
 
+void userInput() {
+	string input;
+	int mainMenu = 0, subMenu = 0, subsubMenu = 0;
+	int savePlaneID = -1;
+	while (1) {
+		getline(cin, input);
+		char storeInput[sizeof(input) + 1];
+		input.copy(storeInput, input.size() + 1);
+		storeInput[input.size()] = '\0';
+		// strcpy(storeInput,input.c_str());
+
+		// menu();
+		if (mainMenu == 0) {
+			if (!strcmp(storeInput, "1")) {
+				cout << "Enter plane ID for which you wish to change altitude.\n";
+				subMenu = 1;
+				mainMenu = 1;
+				continue;
+			}
+			else if (!strcmp(storeInput, "2")) {
+				cout << "Enter plane ID for which you wish to get status. \n";
+				subMenu = 2;
+				mainMenu = 1;
+				continue;
+			}
+			else {
+				cout << "Enter 1 to change altitude or 2 to get status\n";
+				continue;
+			}
+		}
+		if (subMenu == 1) {
+			cout << "Enter desired altitude: \n";
+			savePlaneID = atoi(storeInput);
+			subsubMenu = 1;
+			subMenu = 0;
+			continue;
+		}
+		else if (subMenu == 2) {
+			//call function to get status. Pass it parameter "(atoi(storeInput));"
+			mainMenu = 0; // go back to initial menu
+			subMenu = 0; //reset subMenu
+			continue;
+		}
+		if (subsubMenu == 1) {
+			//call setAltitude(plane savePlaneID, atoi(storeInput));
+			mainMenu = 0; //return to main menu
+			subsubMenu = 0; //reset subsub;
+			continue;
+		}
+
+
+	}
+}
+
 
 int main() {
 
-	
+	thread menuthread(userInput);
+	menuthread.detach();
 
 	int airplane_schedule[160] = {
 		0, -641, 283, 500, 95000, 101589, 10000, 13,
@@ -1050,9 +1106,9 @@ int main() {
 			else if (released[i].isInsideTheBlock(released[i].getCurrentLocation(), width, depth, height, 0, 0, 0)) {
 				active.push_back(released[i]);			//put plane into Active array
 				receiveBroadcast(released[i]);			//Receive Message from other ATC about new plane
-				
-					released.erase(released.begin() + i);	//erase plane from Released array
-				
+
+				released.erase(released.begin() + i);	//erase plane from Released array
+
 
 			}
 		}
