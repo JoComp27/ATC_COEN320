@@ -15,6 +15,7 @@
 #include <functional>
 #include <fstream>
 #include <string>
+#include <unistd.h>
 #include <string.h>
 #include <algorithm>
 #include <cmath>
@@ -424,7 +425,7 @@ void receiveBroadcast(Plane a) {
 }
 
 
-void request(Plane &a, int messageType, int n = 1) {
+void request(Plane &a, int messageType, int n) {
 	double diffTime = getTime();
 	while (!infoMtxLock.try_lock()) {
 	}
@@ -469,7 +470,7 @@ void request(Plane &a, int messageType, int n = 1) {
 	infoMtxLock.unlock();
 }
 
-void response(Plane &a, int messageType, int n = 1) {
+void response(Plane &a, int messageType, int n) {
 	double diffTime = getTime();
 	while (!infoMtxLock.try_lock()) {
 	}
@@ -511,7 +512,7 @@ void response(Plane &a, int messageType, int n = 1) {
 			+ ", over.");
 
 		cout << ", our current velocity is"
-			<< " vx: " << a.getCircleVelocity().getVx()
+			<< " vx: " << a.getCurrentVelocity().getVx()
 			<< " vy: " << a.getCurrentVelocity().getVy()
 			<< " vz: " << a.getCurrentVelocity().getVz()
 			<< ", over." << endl << endl;
@@ -777,6 +778,25 @@ void updateLocation() {
 
 }
 
+bool planeIsActive(int id) {
+	for (int i = 0; i < active.size(); i++) {
+		if (active[i].getId() == id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+Plane& getPlaneById(int id) {
+	for (int i = 0; i < active.size(); i++) {
+		if (active[i].getId() == id) {
+			return active[i];
+		}
+	}
+	cout << "Plane " << id << " is not in the active block.\n";
+}
+
 void menu() {
 	cout << "************  Menu  ************" << endl;
 	cout << "Do you want to : \na) Change altitude by n*1000 ft\n";
@@ -962,10 +982,9 @@ void userInput() {
 	int savePlaneID = -1;
 	while (1) {
 		getline(cin, input);
-		char storeInput[sizeof(input) + 1];
+		char storeInput[input.length() + 1];
 		input.copy(storeInput, input.size() + 1);
 		storeInput[input.size()] = '\0';
-		// strcpy(storeInput,input.c_str());
 
 		// menu();
 		if (mainMenu == 0) {
@@ -994,17 +1013,32 @@ void userInput() {
 			continue;
 		}
 		else if (subMenu == 2) {
-			//call function to get status. Pass it parameter "(atoi(storeInput));"
+			if (planeIsActive(atoi(storeInput))) {
+				response(getPlaneById(atoi(storeInput)), 1, 1);
+				response(getPlaneById(atoi(storeInput)), 2, 1);
+			}
+			else {
+				cout << "Plane is not in the active block.\n";
+			}
 			mainMenu = 0; // go back to initial menu
 			subMenu = 0; //reset subMenu
 			continue;
 		}
 		if (subsubMenu == 1) {
-			//call setAltitude(plane savePlaneID, atoi(storeInput));
+			//sets altitude of Plain
+			if (planeIsActive(savePlaneID)) {
+				request(getPlaneById(savePlaneID), 4, atoi(storeInput));
+				response(getPlaneById(savePlaneID), 4, atoi(storeInput));
+			}
+			else {
+				cout << "Plane is not in the active block.\n";
+			}
 			mainMenu = 0; //return to main menu
 			subsubMenu = 0; //reset subsub;
 			continue;
 		}
+
+
 
 
 	}
@@ -1021,7 +1055,7 @@ int main() {
 		1, -5000, 0, 0, 71000, 100000, 10100, 16,
 		-1, 5000, 0, 0, 41000, 100000, 10000, 18,
 		3, 474, -239, 428, 38000, 0, 14000, 44,
-		-1, -535, 520, 360, 95000, 100000, 1000, 49,
+		4, -535, 520, 360, 9500, 1000, 1000, 49,
 		-1, -164, -593, -501, 83000, 100000, 12000, 67,
 		6, 512, 614, 520, 86000, -1571, 9000, 87,
 		7, -275, 153, -399, 47000, 100000, 12000, 103,
@@ -1060,7 +1094,7 @@ int main() {
 		}
 		else {								//else go through ordered vector and put it at its right position
 			int size = ordered.size();
-			for (unsigned int p = 0; p < size; p++) {
+			for (int p = 0; p < size; p++) {
 				if (plane.getReleaseTime() < ordered[p].getReleaseTime()) {
 					ordered.insert(p + ordered.begin(), plane);
 					break;
