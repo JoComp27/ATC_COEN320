@@ -37,16 +37,15 @@ const int height = 25000;
 const int width = 100000;
 const int depth = 100000;
 
-clock_t tStart;
-clock_t tEnd;
+chrono::steady_clock::time_point tStart;
 
-clock_t emptyBlock;
-vector<clock_t> orderedToReleased;
-vector<clock_t> releasedToActive;
-vector<clock_t> activeToDone;
-vector<clock_t> checkCollisions;
-vector<clock_t> updateLocations;
-vector<clock_t> userConsole;
+double emptyBlock;
+vector<double> orderedToReleased;
+vector<double> releasedToActive;
+vector<double> activeToDone;
+vector<double> checkCollisions;
+vector<double> updateLocations;
+vector<double> userConsole;
 
 vector<string> fileOutput;
 
@@ -621,20 +620,20 @@ void printResponseTimes() {
 		sort(updateLocations.begin(), updateLocations.end());
 		//sort(userConsole.begin(), userConsole.begin());
 
-		clock_t max1 = orderedToReleased.back();
-		clock_t min1 = orderedToReleased.front();
+		double max1 = orderedToReleased.back();
+		double min1 = orderedToReleased.front();
 
-		clock_t max2 = releasedToActive.back();
-		clock_t min2 = releasedToActive.front();
+		double max2 = releasedToActive.back();
+		double min2 = releasedToActive.front();
 
-		clock_t max3 = activeToDone.back();
-		clock_t min3 = activeToDone.front();
+		double max3 = activeToDone.back();
+		double min3 = activeToDone.front();
 
-		clock_t max4 = checkCollisions.back();
-		clock_t min4 = checkCollisions.front();
+		double max4 = checkCollisions.back();
+		double min4 = checkCollisions.front();
 
-		clock_t max5 = updateLocations.back();
-		clock_t min5 = updateLocations.front();
+		double max5 = updateLocations.back();
+		double min5 = updateLocations.front();
 
 		//clock_t max6 = userConsole.back();
 		//clock_t min6 = userConsole.front();
@@ -659,34 +658,35 @@ void printResponseTimes() {
 }
 
 void endClock(int processID) {
-	tEnd = clock();
+	auto tEnd = chrono::steady_clock::now();
+	chrono::duration<double> diff = tEnd - tStart;
 	switch (processID) {
 	case 0:
-		emptyBlock = tEnd - tStart;
+		emptyBlock = diff.count();
 		break;
 	case 1:
-		orderedToReleased.push_back(tEnd - tStart - emptyBlock);
+		orderedToReleased.push_back(diff.count());
 		break;
 	case 2:
-		releasedToActive.push_back(tEnd - tStart - emptyBlock);
+		releasedToActive.push_back(diff.count());
 		break;
 	case 3:
-		activeToDone.push_back(tEnd - tStart - emptyBlock);
+		activeToDone.push_back(diff.count());
 		break;
 	case 4:
-		checkCollisions.push_back(tEnd - tStart - emptyBlock);
+		checkCollisions.push_back(diff.count());
 		break;
 	case 5:
-		updateLocations.push_back(tEnd - tStart - emptyBlock);
+		updateLocations.push_back(diff.count());
 		break;
 	case 6:
-		userConsole.push_back(tEnd - tStart - emptyBlock);
+		userConsole.push_back(diff.count());
 		break;
 	};
 }
 
 void emptyBlockTest() {
-	tStart = clock();
+	tStart = chrono::steady_clock::now();
 	//Null Program
 	endClock(0);
 }
@@ -769,9 +769,6 @@ void updateLocation() {
 		plane.updateLocation();
 	}
 	for (auto& plane : active) {
-		plane.updateLocation();
-	}
-	for (auto& plane : done) {
 		plane.updateLocation();
 	}
 	infoMtxLock.unlock();
@@ -1115,7 +1112,7 @@ int main() {
 
 	while (option != 'x') {	//while time is running and planes are not done
 
-		tStart = clock();
+		tStart = chrono::steady_clock::now();
 
 		//Check when first plane is released and store into Release array
 		if (ordered.size() != 0) {
@@ -1128,7 +1125,7 @@ int main() {
 
 		endClock(1);
 
-		tStart = clock();
+		tStart = chrono::steady_clock::now();
 
 		//Check when plane is active and store into Active zone
 		for (unsigned int i = 0; i < released.size(); i++) {
@@ -1149,7 +1146,7 @@ int main() {
 
 		endClock(2);
 
-		tStart = clock();
+		tStart = chrono::steady_clock::now();
 
 		//Check when plane is gets out of active zone
 		for (unsigned int i = 0; i < active.size(); i++) {
@@ -1162,14 +1159,14 @@ int main() {
 
 		endClock(3);
 
-		tStart = clock();
+		tStart = chrono::steady_clock::now();
 
 		//Check for collisions in active list
 		checkForCollision();
 
 		endClock(4);
 
-		tStart = clock();
+		tStart = chrono::steady_clock::now();
 
 		//update the location of all planes
 		updateLocation();
