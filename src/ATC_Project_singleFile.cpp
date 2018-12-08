@@ -44,7 +44,6 @@ vector<double> releasedToActive;
 vector<double> activeToDone;
 vector<double> checkCollisions;
 vector<double> updateLocations;
-vector<double> userConsole;
 
 vector<string> fileOutput;
 
@@ -576,7 +575,6 @@ void printResponseTimes() {
 		sort(activeToDone.begin(), activeToDone.end());
 		sort(checkCollisions.begin(), checkCollisions.end());
 		sort(updateLocations.begin(), updateLocations.end());
-		//sort(userConsole.begin(), userConsole.begin());
 
 		double max1 = orderedToReleased.back();
 		double min1 = orderedToReleased.front();
@@ -632,9 +630,6 @@ void endClock(int processID) {
 		break;
 	case 5:
 		updateLocations.push_back(diff.count());
-		break;
-	case 6:
-		userConsole.push_back(diff.count());
 		break;
 	};
 }
@@ -930,7 +925,7 @@ void userInput() {
 	int savePlaneID = -1;
 	while (1) {
 		getline(cin, input);
-		char storeInput[input.length() + 1];
+		char storeInput[input.size() + 1];
 		input.copy(storeInput, input.size() + 1);
 		storeInput[input.size()] = '\0';
 
