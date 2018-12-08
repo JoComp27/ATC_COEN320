@@ -1133,7 +1133,7 @@ int main() {
 
 	}
 
-	//printResponseTimes(); // Returns the max and min response time of main processes
+	printResponseTimes(); // Returns the max and min response time of main processes
 
 	system("pause");
 	return 0;
