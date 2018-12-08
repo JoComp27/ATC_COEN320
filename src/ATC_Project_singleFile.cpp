@@ -8,7 +8,6 @@
 
 #include <vector>
 #include <iostream>
-//#include <pthread.h>
 #include <time.h>
 #include <thread>
 #include <chrono>
@@ -91,12 +90,6 @@ public:
 		return vz;
 	}
 
-	void print() {
-
-		cout << "vx : " << vx << " , vy : " << vy << ", vz : " << vz;
-
-	}
-
 };
 
 
@@ -118,11 +111,6 @@ public:
 
 	virtual ~Location() {}
 
-	int distanceBetween(Location a) {
-		double result = sqrt(pow(getX() - a.getX(), 2) + pow(getY() - a.getY(), 2) + pow(getZ() - a.getZ(), 2));
-		return round(result);
-	}
-
 	int getX() const {
 		return x;
 	}
@@ -135,22 +123,10 @@ public:
 		return z;
 	}
 
-	void updatePosititon(Velocity a) {
-
-		setPosition(x + a.getVx(), y + a.getVy(), z + a.getVz());
-
-	}
-
 	void setPosition(int x, int y, int z) {
 		this->x = x;
 		this->y = y;
 		this->y = z;
-	}
-
-	void print() {
-
-		cout << "x : " << x << " , y : " << y << " , z : " << z << " , ";
-
 	}
 
 };
@@ -166,10 +142,9 @@ private:
 	int heightLimit = 1000;
 	int sideLimit = 3000;
 
-	double magnetudeOfVelocity;
+	double magnitudeOfVelocity;
 	double circleRadius;
 
-	Location spawnLocation;
 	Location wantedLocation;
 	Location currentLocation;
 
@@ -185,9 +160,8 @@ public:
 		setId(id);
 		this->currentVelocity = Velocity(vx, vy, vz);
 		this->currentLocation = Location(x, y, z);
-		this->spawnLocation = Location(x, y, z);
 		this->releaseTime = releaseTime;
-		magnetudeOfVelocity = sqrt(vx*vx + vy * vy + vz * vz);
+		magnitudeOfVelocity = sqrt(vx*vx + vy * vy + vz * vz);
 	}
 
 	Plane() {
@@ -199,7 +173,7 @@ public:
 
 	}
 	double getMagnitudeVelocity() const {
-		return magnetudeOfVelocity;
+		return magnitudeOfVelocity;
 	}
 	void setId(int id) {
 		if (id == -1) {
@@ -220,8 +194,8 @@ public:
 		this->currentLocation = Location(x, y, z);
 	}
 
-	void setCurrentVelocity(int x, int y, int z) {
-		this->currentVelocity = Velocity(x, y, z);
+	void setCurrentVelocity(int vx, int vy, int vz) {
+		this->currentVelocity = Velocity(vx, vy, vz);
 	}
 
 	Location getCurrentLocation() const {
@@ -234,10 +208,6 @@ public:
 
 	int getReleaseTime() const {
 		return releaseTime;
-	}
-
-	Location getSpawnLocation() const {
-		return spawnLocation;
 	}
 
 	Location getWantedLocation() const {
@@ -296,7 +266,7 @@ public:
 	void toggleHoldingPattern() {
 		if (!isHolding) {
 			isHolding = true;
-			magnetudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnetude of the current Velocity
+			magnitudeOfVelocity = sqrt(pow(currentVelocity.getVx(), 2) + pow(currentVelocity.getVy(), 2) + pow(currentVelocity.getVz(), 2)); //Magnitude of the current Velocity
 			circleRadius = sqrt(pow(50000 - currentLocation.getX(), 2) + pow(50000 - currentLocation.getY(), 2)); // The radius of the circle around the center
 			currentVelocity = getCircleVelocity();
 		}
@@ -320,34 +290,22 @@ public:
 	Velocity goBackToNormal() {
 
 		double vectorMagn = sqrt(pow(wantedLocation.getX() - currentLocation.getX(), 2) + pow(wantedLocation.getY() - currentLocation.getY(), 2) + pow(wantedLocation.getZ() - currentLocation.getZ(), 2));
-		double xVel = magnetudeOfVelocity * (wantedLocation.getX() - currentLocation.getX()) / vectorMagn;
-		double yVel = magnetudeOfVelocity * (wantedLocation.getY() - currentLocation.getY()) / vectorMagn;
-		double zVel = magnetudeOfVelocity * (wantedLocation.getZ() - currentLocation.getZ()) / vectorMagn;
+		double xVel = magnitudeOfVelocity * (wantedLocation.getX() - currentLocation.getX()) / vectorMagn;
+		double yVel = magnitudeOfVelocity * (wantedLocation.getY() - currentLocation.getY()) / vectorMagn;
+		double zVel = magnitudeOfVelocity * (wantedLocation.getZ() - currentLocation.getZ()) / vectorMagn;
 
 		return Velocity(xVel, yVel, zVel); //Reset the velocity to go to destination
 
 	}
 
-	Velocity getCircleVelocity() { // Calculates the velcity vector according to the tangent of the circle wanted
+	Velocity getCircleVelocity() { // Calculates the velocity vector according to the tangent of the circle wanted
 
-		double xVel = magnetudeOfVelocity * ((currentLocation.getY() - 50000) / circleRadius);
-		double yVel = -magnetudeOfVelocity * ((currentLocation.getX() - 50000) / circleRadius);
+		double xVel = magnitudeOfVelocity * ((currentLocation.getY() - 50000) / circleRadius);
+		double yVel = -magnitudeOfVelocity * ((currentLocation.getX() - 50000) / circleRadius);
 
 		return Velocity(xVel, yVel, 0);
 	}
 
-	void print() {
-		cout << "ID : ";
-		if (ufo) {
-			cout << "Unknown , ";
-		}
-		else {
-			cout << id << " , ";
-		}
-		currentLocation.print();
-		currentVelocity.print();
-		cout << endl;
-	}
 
 };
 
@@ -599,7 +557,7 @@ void printHitList() {
 
 		cout << " x : " << temp.getCurrentLocation().getX() << " , "
 			<< " y : " << temp.getCurrentLocation().getY() << " , "
-			<< " z : " << temp.getCurrentLocation().getZ() << " , "
+			<< " z : " << temp.getCurrentLocation().getZ()
 			<< endl;
 
 	}
@@ -611,7 +569,7 @@ void printHitList() {
 }
 
 void printResponseTimes() {
-	if (orderedToReleased.size() != 0 || releasedToActive.size() != 0 || activeToDone.size() != 0 || checkCollisions.size() != 0 || updateLocations.size() != 0) {
+	if ((orderedToReleased.size() > 1) & (releasedToActive.size() > 1) & (activeToDone.size() > 1) & (checkCollisions.size() > 1)  & (updateLocations.size() > 1)) {
 
 		sort(orderedToReleased.begin(), orderedToReleased.end());
 		sort(releasedToActive.begin(), releasedToActive.end());
@@ -635,15 +593,12 @@ void printResponseTimes() {
 		double max5 = updateLocations.back();
 		double min5 = updateLocations.front();
 
-		//clock_t max6 = userConsole.back();
-		//clock_t min6 = userConsole.front();
 
 		fileOutput.push_back(" ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- \n1. Ordered To Released	=> Max: " + to_string(max1) + " , Min: " + to_string(min1)
 			+ "\n2. Released to Active	=> Max: " + to_string(max2) + " , Min: " + to_string(min2)
 			+ "\n3. Active to Done		=> Max: " + to_string(max3) + " , Min: " + to_string(min3)
 			+ "\n4. Check Collisions		=> Max: " + to_string(max4) + " , Min: " + to_string(min4)
 			+ "\n5. Update Locations		=> Max: " + to_string(max5) + " , Min: " + to_string(min5));
-		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
 
 		cout << " ---------- RESPONSE TIME FOR PROCESSES GATHERED ---------- " << endl
 			<< "1. Ordered To Released	=> Max: " << max1 << " , Min: " << min1 << endl
@@ -651,7 +606,6 @@ void printResponseTimes() {
 			<< "3. Active to Done		=> Max: " << max3 << " , Min: " << min3 << endl
 			<< "4. Check Collisions		=> Max: " << max4 << " , Min: " << min4 << endl
 			<< "5. Update Locations		=> Max: " << max5 << " , Min: " << min5 << endl;
-		//<< "6. User Console			=> Max: " << max6 << " , Min: " << min6 << endl;
 
 	}
 
@@ -803,8 +757,7 @@ void menu() {
 	cout << "e) Report current position and velocity\n";
 	cout << "f) Add or delete an aircraft\n";
 	cout << "g) Change position of aircraft\n";
-	cout << "h) Display data record for a given aircraft\n";
-	cout << "i) Project aircraft positions in future\n";
+	cout << "h) Project aircraft positions in future\n";
 }
 
 void choice(Plane a, char Choice) {
@@ -865,7 +818,8 @@ void choice(Plane a, char Choice) {
 		a.toggleHoldingPattern();
 		break;
 	case 'e':
-		a.print();
+		response(a, 2, 1);
+		response(a, 1, 1);
 		break;
 	case 'f':
 	{
@@ -926,7 +880,7 @@ void choice(Plane a, char Choice) {
 			cin >> id;
 			for (int p = 0; p < active.size(); p++) {
 				if (active[p].getId() == id) {
-					cout << "Plane " << id << "was deleted sucessfully.\n";
+					cout << "Plane " << id << "was deleted successfully.\n";
 					active.erase(ordered.begin() + p);	//erase the plane from the active array
 					break;
 				}
@@ -948,9 +902,6 @@ void choice(Plane a, char Choice) {
 		break;
 	}
 	case 'h':
-		a.print(); //NEED TO PRINT RECORD OF PAST LOCATIONS *******
-		break;
-	case 'i':
 	{
 		int time;
 		cout << "At what time do you want to project the future location of the aircraft?\n";
@@ -997,6 +948,10 @@ void userInput() {
 				mainMenu = 1;
 				continue;
 			}
+			else if (!strcmp(storeInput, "3")) {
+				subMenu = 3;
+				mainMenu = 1;
+			}
 			else {
 				cout << "Enter 1 to change altitude or 2 to get status\n";
 				continue;
@@ -1020,6 +975,10 @@ void userInput() {
 			mainMenu = 0; // go back to initial menu
 			subMenu = 0; //reset subMenu
 			continue;
+		}
+		else if (subMenu == 3) {
+			printResponseTimes();
+			mainMenu = 0;
 		}
 		if (subsubMenu == 1) {
 			//sets altitude of Plain
@@ -1052,7 +1011,7 @@ int main() {
 		1, -5000, 0, 0, 71000, 100000, 10100, 16,
 		-1, 5000, 0, 0, 41000, 100000, 10000, 18,
 		3, 474, -239, 428, 38000, 0, 14000, 44,
-		4, -535, 520, 360, 9500, 1000, 1000, 49,
+		4, -25, 20, 30, 9500, 1000, 1000, 3,
 		-1, -164, -593, -501, 83000, 100000, 12000, 67,
 		6, 512, 614, 520, 86000, -1571, 9000, 87,
 		7, -275, 153, -399, 47000, 100000, 12000, 103,
@@ -1107,7 +1066,8 @@ int main() {
 
 	timer_start(printHitList, 5000);
 	timer_start(pushToFile, 5000);
-
+	////thread printResponse(printResponseTimes);
+	//printResponse.detach();
 	char option = 'm';
 
 	while (option != 'x') {	//while time is running and planes are not done
@@ -1183,8 +1143,3 @@ int main() {
 	system("pause");
 	return 0;
 }
-
-//PARAMETERS OF PROJECT
-// (ID, Vx, Vy, Vz, X, Y, Z, Release time)
-// Height of block : 25000
-// Width and length of block : 100000
